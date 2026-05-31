@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
 import {
   getDatabase,
   ref,
@@ -7,6 +8,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 // ================= FIREBASE =================
+
 const firebaseConfig = {
   apiKey: "AIzaSyAdXM0egIpInr5bt3bMsR3f6Nl09lGwzQs",
   authDomain: "herbadry-monitoring.firebaseapp.com",
@@ -21,12 +23,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ================= HEADER =================
+// ================= ELEMENT =================
+
 const wifiIcon = document.getElementById("wifiIcon");
 const espStatus = document.getElementById("espStatus");
 const clock = document.getElementById("clock");
 
-// ================= ELEMENT =================
 const suhu = document.getElementById("suhu");
 const kelembapan = document.getElementById("kelembapan");
 const soil = document.getElementById("soil");
@@ -39,7 +41,9 @@ const popup = document.getElementById("popup");
 const popupText = document.getElementById("popupText");
 
 // ================= JAM =================
+
 setInterval(() => {
+
   const now = new Date();
 
   const h = String(now.getHours()).padStart(2, "0");
@@ -47,43 +51,67 @@ setInterval(() => {
   const s = String(now.getSeconds()).padStart(2, "0");
 
   clock.innerText = `${h}:${m}:${s}`;
+
 }, 1000);
 
-// ================= STATUS ESP =================
+// ================= STATUS ESP32 =================
+
 onValue(ref(db, "sensor/ip"), (snap) => {
 
   if (snap.exists() && snap.val() !== "") {
+
     wifiIcon.className = "wifi-icon wifi-online";
+
     espStatus.innerText = "ESP32 Online";
-    espStatus.className = "esp-status esp-online";
+
+    espStatus.className =
+      "esp-status esp-online";
+
   } else {
+
     wifiIcon.className = "wifi-icon wifi-offline";
+
     espStatus.innerText = "ESP32 Offline";
-    espStatus.className = "esp-status esp-offline";
+
+    espStatus.className =
+      "esp-status esp-offline";
   }
 
 });
 
-// ================= SENSOR =================
+// ================= DATA SENSOR =================
+
 onValue(ref(db, "sensor"), (snap) => {
 
   const data = snap.val();
+
   if (!data) return;
 
-  suhu.innerText = Number(data.suhu).toFixed(1) + " °C";
-  kelembapan.innerText = Number(data.kelembapan).toFixed(1) + " %";
-  soil.innerText = data.soil + " %";
-  status.innerText = data.kondisi;
+  const suhuValue = Number(data.suhu);
+  const rhValue = Number(data.kelembapan);
+  const soilValue = Number(data.soil);
 
-  // default popup hide
+  suhu.innerText =
+    suhuValue.toFixed(1) + " °C";
+
+  kelembapan.innerText =
+    rhValue.toFixed(1) + " %";
+
+  soil.innerText =
+    soilValue + " %";
+
+  status.innerHTML =
+    `${data.kondisi}<br>
+     <small>${suhuValue.toFixed(1)}°C | RH ${rhValue.toFixed(1)}%</small>`;
+
   popup.classList.add("hidden");
 
-  // ================= STATUS BAR =================
+  // ================= STATUS =================
 
   if (data.kondisi === "Heating") {
 
     notif.innerHTML =
-      '<i class="bi bi-fire"></i> Pemanasan Oven...';
+      '<i class="bi bi-fire"></i> Pemanasan Oven';
 
     notif.className = "notif aman";
   }
@@ -91,7 +119,7 @@ onValue(ref(db, "sensor"), (snap) => {
   else if (data.kondisi === "Optimal") {
 
     notif.innerHTML =
-      '<i class="bi bi-check-circle-fill"></i> Suhu Optimal Tercapai';
+      '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
 
     notif.className = "notif aman";
   }
@@ -99,54 +127,76 @@ onValue(ref(db, "sensor"), (snap) => {
   else if (data.kondisi === "Warning") {
 
     notif.innerHTML =
-      '<i class="bi bi-exclamation-triangle-fill"></i> Suhu Mulai Tinggi';
+      '<i class="bi bi-exclamation-triangle-fill"></i> Warning: Suhu/RH Tidak Ideal';
 
     notif.className = "notif warning";
 
     popup.classList.remove("hidden");
-    popupText.innerHTML = "WARNING!";
+
+    popupText.innerHTML =
+      "WARNING!";
   }
 
-  else {
+  else if (data.kondisi === "Danger") {
 
     notif.innerHTML =
-      '<i class="bi bi-exclamation-octagon-fill"></i> Suhu Sangat Tinggi!';
+      '<i class="bi bi-exclamation-octagon-fill"></i> DANGER: Kondisi Berbahaya';
 
     notif.className = "notif bahaya";
 
     popup.classList.remove("hidden");
-    popupText.innerHTML = "DANGER!";
+
+    popupText.innerHTML =
+      "DANGER!";
   }
 
-  // jika moisture selesai
-  if (data.soil < 10) {
+  else if (data.kondisi === "Done") {
+
     notif.innerHTML =
       '<i class="bi bi-check2-square"></i> Pengeringan Selesai';
+
     notif.className = "notif aman";
   }
 
 });
 
-// ================= STATUS ALARM =================
+// ================= STATUS BUZZER =================
+
 onValue(ref(db, "control/buzzerOff"), (snap) => {
 
   if (snap.val() === true) {
-    buzzerStatus.innerText = "Alarm: OFF";
+
+    buzzerStatus.innerText =
+      "Alarm: OFF";
+
   } else {
-    buzzerStatus.innerText = "Alarm: ON";
+
+    buzzerStatus.innerText =
+      "Alarm: ON";
   }
 
 });
 
-// ================= BUTTON =================
+// ================= TOMBOL =================
+
 window.matikanBuzzer = function () {
-  set(ref(db, "control/buzzerOff"), true);
+
+  set(
+    ref(db, "control/buzzerOff"),
+    true
+  );
+
   popup.classList.add("hidden");
 };
 
 // ================= INTERNET USER =================
+
 setInterval(() => {
+
   if (!navigator.onLine) {
-    wifiIcon.className = "wifi-icon wifi-offline";
+
+    wifiIcon.className =
+      "wifi-icon wifi-offline";
   }
+
 }, 3000);

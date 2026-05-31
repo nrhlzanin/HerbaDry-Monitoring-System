@@ -11,10 +11,10 @@
 #define DATABASE_URL "https://herbadry-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app/"
 
 // ================= PIN =================
-#define DHTPIN    26
-#define DHTTYPE   DHT22
-#define SOIL_PIN  34
-#define BUZZER    19
+#define DHTPIN 26
+#define DHTTYPE DHT22
+#define SOIL_PIN 34
+#define BUZZER 19
 
 // ================= OBJECT =================
 FirebaseData fbdo;
@@ -132,24 +132,27 @@ void checkCondition()
         return;
     }
 
-    // bahaya
-    if (t >= suhuDanger)
+    // kondisi bahaya
+    if (t >= 70 || h >= 80)
     {
         kondisi = "Danger";
     }
 
-    // warning
-    else if (t >= suhuWarningMin)
+    // kondisi warning
+    else if (
+        (t >= 65 && t < 70) ||
+        (h > 55 && h < 80) ||
+        (h < 25))
     {
         kondisi = "Warning";
     }
 
-    // optimal
+    // kondisi optimal
     else if (
-        t >= suhuOptimalMin &&
-        t < suhuOptimalMax &&
-        h >= rhMin &&
-        h <= rhMax)
+        t >= 60 &&
+        t <= 65 &&
+        h >= 30 &&
+        h <= 55)
     {
         kondisi = "Optimal";
     }
