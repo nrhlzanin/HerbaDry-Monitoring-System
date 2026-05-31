@@ -8,8 +8,14 @@ import {
 
 // ================= FIREBASE =================
 const firebaseConfig = {
-  apiKey: "AIzaSyAJs0emTj-c5kUSILGg9FR8YjoItVgG2MQ",
-  databaseURL: "https://iot-skripsi-ea976-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  apiKey: "AIzaSyAdXM0egIpInr5bt3bMsR3f6Nl09lGwzQs",
+  authDomain: "herbadry-monitoring.firebaseapp.com",
+  databaseURL: "https://herbadry-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "herbadry-monitoring",
+  storageBucket: "herbadry-monitoring.firebasestorage.app",
+  messagingSenderId: "714369778562",
+  appId: "1:714369778562:web:3ea942ef318bd5f7d4c59b",
+  measurementId: "G-BX2N20LC0W"
 };
 
 const app = initializeApp(firebaseConfig);
