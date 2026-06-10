@@ -41,7 +41,8 @@ const buzzerStatus = document.getElementById("buzzerStatus");
 const popup = document.getElementById("popup");
 const popupText = document.getElementById("popupText");
 let alarmOff = false;
-let lastTimestamp = 0;
+let lastUpdate = Date.now();
+let popupShown = false;
 
 // ================= JAM =================
 
@@ -76,10 +77,10 @@ onValue(ref(db, "sensor/ip"), (snap) => {
 // ================= DATA SENSOR =================
 
 onValue(ref(db, "sensor"), (snap) => {
+  lastUpdate = Date.now();
   const data = snap.val();
 
   if (!data) return;
-  lastTimestamp = data.timestamp || 0;
 
   const suhuValue = Number(data.suhu);
   const rhValue = Number(data.kelembapan);
@@ -94,16 +95,22 @@ onValue(ref(db, "sensor"), (snap) => {
   status.innerHTML = `${data.kondisi}<br>
      <small>${suhuValue.toFixed(1)}°C | RH ${rhValue.toFixed(1)}%</small>`;
 
-  popup.classList.add("hidden");
 
   // ================= STATUS =================
 
   if (data.kondisi === "Heating") {
+
+    popupShown = false;
+
     notif.innerHTML = '<i class="bi bi-fire"></i> Pemanasan Oven';
 
     notif.className = "notif aman";
   } else if (data.kondisi === "Optimal") {
-    notif.innerHTML = '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
+
+    popupShown = false;
+
+    notif.innerHTML =
+      '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
 
     notif.className = "notif aman";
   } else if (data.kondisi === "Warning") {
@@ -113,10 +120,13 @@ onValue(ref(db, "sensor"), (snap) => {
     notif.className = "notif warning";
 
     if (document.getElementById("buzzerStatus").innerText !== "Alarm: OFF") {
-      if (!alarmOff) {
+      if (!alarmOff && !popupShown) {
+
         popup.classList.remove("hidden");
 
         popupText.innerHTML = "WARNING!";
+
+        popupShown = true;
       }
     }
   } else if (data.kondisi === "Danger") {
@@ -125,13 +135,20 @@ onValue(ref(db, "sensor"), (snap) => {
 
     notif.className = "notif bahaya";
 
-    if (!alarmOff) {
+    if (!alarmOff && !popupShown) {
+
       popup.classList.remove("hidden");
 
       popupText.innerHTML = "DANGER!";
+
+      popupShown = true;
     }
   } else if (data.kondisi === "Done") {
-    notif.innerHTML = '<i class="bi bi-check2-square"></i> Pengeringan Selesai';
+
+    popupShown = false;
+
+    notif.innerHTML =
+      '<i class="bi bi-check2-square"></i> Pengeringan Selesai';
 
     notif.className = "notif aman";
   }
@@ -152,9 +169,12 @@ onValue(ref(db, "control/buzzerOff"), (snap) => {
 // ================= TOMBOL =================
 
 window.matikanBuzzer = function () {
+
   set(ref(db, "control/buzzerOff"), true);
 
   popup.classList.add("hidden");
+
+  popupShown = true;
 };
 
 // ================= INTERNET USER =================
@@ -166,15 +186,16 @@ setInterval(() => {
 }, 3000);
 
 setInterval(() => {
-  const currentTimestamp = Date.now();
 
-  const diff = currentTimestamp - lastTimestamp;
+  const diff = Date.now() - lastUpdate;
 
   if (diff > 10000) {
+
     espStatus.innerText = "ESP32 Offline";
 
     espStatus.className = "esp-status esp-offline";
 
     wifiIcon.className = "wifi-icon wifi-offline";
   }
+
 }, 2000);
