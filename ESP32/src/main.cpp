@@ -94,6 +94,8 @@ void initFirebase()
     config.api_key = API_KEY;
     config.database_url = DATABASE_URL;
 
+    config.signer.test_mode = true;
+
     Firebase.begin(&config, &auth);
     Firebase.reconnectWiFi(true);
 
@@ -108,6 +110,14 @@ void readSensor()
     float temp = dht.readTemperature();
     float hum = dht.readHumidity();
 
+    Serial.println("===== DHT READ =====");
+
+    Serial.print("Temp RAW = ");
+    Serial.println(temp);
+
+    Serial.print("Hum RAW = ");
+    Serial.println(hum);
+
     if (!isnan(temp))
         t = temp;
 
@@ -118,6 +128,15 @@ void readSensor()
 
     soil = map(raw, soilDry, soilWet, 0, 100);
     soil = constrain(soil, 0, 100);
+
+    Serial.print("T = ");
+    Serial.println(t);
+
+    Serial.print("H = ");
+    Serial.println(h);
+
+    Serial.print("Soil = ");
+    Serial.println(soil);
 }
 
 // =========================================
@@ -203,11 +222,33 @@ void updateLCD()
 // =========================================
 void sendFirebase()
 {
-    Firebase.RTDB.setFloat(&fbdo, "/sensor/suhu", t);
-    Firebase.RTDB.setFloat(&fbdo, "/sensor/kelembapan", h);
-    Firebase.RTDB.setInt(&fbdo, "/sensor/soil", soil);
-    Firebase.RTDB.setString(&fbdo, "/sensor/kondisi", kondisi);
-    Firebase.RTDB.setString(&fbdo, "/sensor/ip", WiFi.localIP().toString());
+    Serial.println("=== FIREBASE SEND ===");
+
+    if (Firebase.RTDB.setFloat(&fbdo, "/sensor/suhu", t))
+        Serial.println("Suhu OK");
+    else
+        Serial.println(fbdo.errorReason());
+
+    if (Firebase.RTDB.setFloat(&fbdo, "/sensor/kelembapan", h))
+        Serial.println("RH OK");
+    else
+        Serial.println(fbdo.errorReason());
+
+    if (Firebase.RTDB.setInt(&fbdo, "/sensor/soil", soil))
+        Serial.println("Soil OK");
+    else
+        Serial.println(fbdo.errorReason());
+
+    if (Firebase.RTDB.setString(&fbdo, "/sensor/kondisi", kondisi))
+        Serial.println("Status OK");
+    else
+        Serial.println(fbdo.errorReason());
+
+    if (Firebase.RTDB.setString(&fbdo, "/sensor/ip",
+                                WiFi.localIP().toString()))
+        Serial.println("IP OK");
+    else
+        Serial.println(fbdo.errorReason());
 }
 
 // =========================================

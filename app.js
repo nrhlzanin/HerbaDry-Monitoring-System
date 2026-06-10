@@ -4,7 +4,7 @@ import {
   getDatabase,
   ref,
   onValue,
-  set
+  set,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 // ================= FIREBASE =================
@@ -12,12 +12,13 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyAdXM0egIpInr5bt3bMsR3f6Nl09lGwzQs",
   authDomain: "herbadry-monitoring.firebaseapp.com",
-  databaseURL: "https://herbadry-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
+  databaseURL:
+    "https://herbadry-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "herbadry-monitoring",
   storageBucket: "herbadry-monitoring.firebasestorage.app",
   messagingSenderId: "714369778562",
   appId: "1:714369778562:web:3ea942ef318bd5f7d4c59b",
-  measurementId: "G-BX2N20LC0W"
+  measurementId: "G-BX2N20LC0W",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -43,7 +44,6 @@ const popupText = document.getElementById("popupText");
 // ================= JAM =================
 
 setInterval(() => {
-
   const now = new Date();
 
   const h = String(now.getHours()).padStart(2, "0");
@@ -51,38 +51,29 @@ setInterval(() => {
   const s = String(now.getSeconds()).padStart(2, "0");
 
   clock.innerText = `${h}:${m}:${s}`;
-
 }, 1000);
 
 // ================= STATUS ESP32 =================
 
 onValue(ref(db, "sensor/ip"), (snap) => {
-
   if (snap.exists() && snap.val() !== "") {
-
     wifiIcon.className = "wifi-icon wifi-online";
 
     espStatus.innerText = "ESP32 Online";
 
-    espStatus.className =
-      "esp-status esp-online";
-
+    espStatus.className = "esp-status esp-online";
   } else {
-
     wifiIcon.className = "wifi-icon wifi-offline";
 
     espStatus.innerText = "ESP32 Offline";
 
-    espStatus.className =
-      "esp-status esp-offline";
+    espStatus.className = "esp-status esp-offline";
   }
-
 });
 
 // ================= DATA SENSOR =================
 
 onValue(ref(db, "sensor"), (snap) => {
-
   const data = snap.val();
 
   if (!data) return;
@@ -91,17 +82,13 @@ onValue(ref(db, "sensor"), (snap) => {
   const rhValue = Number(data.kelembapan);
   const soilValue = Number(data.soil);
 
-  suhu.innerText =
-    suhuValue.toFixed(1) + " °C";
+  suhu.innerText = suhuValue.toFixed(1) + " °C";
 
-  kelembapan.innerText =
-    rhValue.toFixed(1) + " %";
+  kelembapan.innerText = rhValue.toFixed(1) + " %";
 
-  soil.innerText =
-    soilValue + " %";
+  soil.innerText = soilValue + " %";
 
-  status.innerHTML =
-    `${data.kondisi}<br>
+  status.innerHTML = `${data.kondisi}<br>
      <small>${suhuValue.toFixed(1)}°C | RH ${rhValue.toFixed(1)}%</small>`;
 
   popup.classList.add("hidden");
@@ -109,36 +96,24 @@ onValue(ref(db, "sensor"), (snap) => {
   // ================= STATUS =================
 
   if (data.kondisi === "Heating") {
-
-    notif.innerHTML =
-      '<i class="bi bi-fire"></i> Pemanasan Oven';
+    notif.innerHTML = '<i class="bi bi-fire"></i> Pemanasan Oven';
 
     notif.className = "notif aman";
-  }
-
-  else if (data.kondisi === "Optimal") {
-
-    notif.innerHTML =
-      '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
+  } else if (data.kondisi === "Optimal") {
+    notif.innerHTML = '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
 
     notif.className = "notif aman";
-  }
-
-  else if (data.kondisi === "Warning") {
-
+  } else if (data.kondisi === "Warning") {
     notif.innerHTML =
       '<i class="bi bi-exclamation-triangle-fill"></i> Warning: Suhu/RH Tidak Ideal';
 
     notif.className = "notif warning";
 
-    popup.classList.remove("hidden");
-
-    popupText.innerHTML =
-      "WARNING!";
-  }
-
-  else if (data.kondisi === "Danger") {
-
+    if (document.getElementById("buzzerStatus").innerText !== "Alarm: OFF") {
+      popup.classList.remove("hidden");
+      popupText.innerHTML = "WARNING!";
+    }
+  } else if (data.kondisi === "Danger") {
     notif.innerHTML =
       '<i class="bi bi-exclamation-octagon-fill"></i> DANGER: Kondisi Berbahaya';
 
@@ -146,45 +121,28 @@ onValue(ref(db, "sensor"), (snap) => {
 
     popup.classList.remove("hidden");
 
-    popupText.innerHTML =
-      "DANGER!";
-  }
-
-  else if (data.kondisi === "Done") {
-
-    notif.innerHTML =
-      '<i class="bi bi-check2-square"></i> Pengeringan Selesai';
+    popupText.innerHTML = "DANGER!";
+  } else if (data.kondisi === "Done") {
+    notif.innerHTML = '<i class="bi bi-check2-square"></i> Pengeringan Selesai';
 
     notif.className = "notif aman";
   }
-
 });
 
 // ================= STATUS BUZZER =================
 
 onValue(ref(db, "control/buzzerOff"), (snap) => {
-
   if (snap.val() === true) {
-
-    buzzerStatus.innerText =
-      "Alarm: OFF";
-
+    buzzerStatus.innerText = "Alarm: OFF";
   } else {
-
-    buzzerStatus.innerText =
-      "Alarm: ON";
+    buzzerStatus.innerText = "Alarm: ON";
   }
-
 });
 
 // ================= TOMBOL =================
 
 window.matikanBuzzer = function () {
-
-  set(
-    ref(db, "control/buzzerOff"),
-    true
-  );
+  set(ref(db, "control/buzzerOff"), true);
 
   popup.classList.add("hidden");
 };
@@ -192,11 +150,7 @@ window.matikanBuzzer = function () {
 // ================= INTERNET USER =================
 
 setInterval(() => {
-
   if (!navigator.onLine) {
-
-    wifiIcon.className =
-      "wifi-icon wifi-offline";
+    wifiIcon.className = "wifi-icon wifi-offline";
   }
-
 }, 3000);
