@@ -40,6 +40,8 @@ const buzzerStatus = document.getElementById("buzzerStatus");
 
 const popup = document.getElementById("popup");
 const popupText = document.getElementById("popupText");
+let alarmOff = false;
+let lastTimestamp = 0;
 
 // ================= JAM =================
 
@@ -77,6 +79,7 @@ onValue(ref(db, "sensor"), (snap) => {
   const data = snap.val();
 
   if (!data) return;
+  lastTimestamp = data.timestamp || 0;
 
   const suhuValue = Number(data.suhu);
   const rhValue = Number(data.kelembapan);
@@ -110,8 +113,11 @@ onValue(ref(db, "sensor"), (snap) => {
     notif.className = "notif warning";
 
     if (document.getElementById("buzzerStatus").innerText !== "Alarm: OFF") {
-      popup.classList.remove("hidden");
-      popupText.innerHTML = "WARNING!";
+      if (!alarmOff) {
+        popup.classList.remove("hidden");
+
+        popupText.innerHTML = "WARNING!";
+      }
     }
   } else if (data.kondisi === "Danger") {
     notif.innerHTML =
@@ -119,9 +125,11 @@ onValue(ref(db, "sensor"), (snap) => {
 
     notif.className = "notif bahaya";
 
-    popup.classList.remove("hidden");
+    if (!alarmOff) {
+      popup.classList.remove("hidden");
 
-    popupText.innerHTML = "DANGER!";
+      popupText.innerHTML = "DANGER!";
+    }
   } else if (data.kondisi === "Done") {
     notif.innerHTML = '<i class="bi bi-check2-square"></i> Pengeringan Selesai';
 
@@ -132,7 +140,9 @@ onValue(ref(db, "sensor"), (snap) => {
 // ================= STATUS BUZZER =================
 
 onValue(ref(db, "control/buzzerOff"), (snap) => {
-  if (snap.val() === true) {
+  alarmOff = snap.val() === true;
+
+  if (alarmOff) {
     buzzerStatus.innerText = "Alarm: OFF";
   } else {
     buzzerStatus.innerText = "Alarm: ON";
@@ -154,3 +164,17 @@ setInterval(() => {
     wifiIcon.className = "wifi-icon wifi-offline";
   }
 }, 3000);
+
+setInterval(() => {
+  const currentTimestamp = Date.now();
+
+  const diff = currentTimestamp - lastTimestamp;
+
+  if (diff > 10000) {
+    espStatus.innerText = "ESP32 Offline";
+
+    espStatus.className = "esp-status esp-offline";
+
+    wifiIcon.className = "wifi-icon wifi-offline";
+  }
+}, 2000);
