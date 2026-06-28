@@ -45,6 +45,7 @@ const popupText = document.getElementById("popupText");
 let alarmOff = false;
 let lastUpdate = Date.now();
 let popupShown = false;
+let startTime = 0;
 
 // ================= JAM =================
 
@@ -72,6 +73,31 @@ onValue(ref(db, "sensor/ip"), (snap) => {
   }
 });
 
+// ================= AMBIL START TIME =================
+
+onValue(ref(db, "sensor/startTime"), (snap) => {
+  if (snap.exists()) {
+    startTime = snap.val();
+  }
+});
+
+// ================= TIMER REALTIME =================
+
+setInterval(() => {
+  if (startTime > 0) {
+    const durationMinutes =
+      Math.floor((Date.now() - startTime) / 60000);
+
+    const jam = Math.floor(durationMinutes / 60);
+    const menit = durationMinutes % 60;
+
+    duration.innerText =
+      `${String(jam).padStart(2, "0")}h ${String(menit).padStart(2, "0")}m`;
+  } else {
+    duration.innerText = "00h 00m";
+  }
+}, 1000);
+
 // ================= DATA SENSOR =================
 
 onValue(ref(db, "sensor"), (snap) => {
@@ -79,50 +105,64 @@ onValue(ref(db, "sensor"), (snap) => {
 
   const data = snap.val();
 
-  const startTime = data.startTime || 0;
-
-  if (startTime > 0) {
-    const durationMinutes = Math.floor((Date.now() - startTime) / 60000);
-
-    const jam = Math.floor(durationMinutes / 60);
-    const menit = durationMinutes % 60;
-
-    duration.innerText = `${String(jam).padStart(2, "0")}h ${String(menit).padStart(2, "0")}m`;
-  }
-
   if (!data) return;
 
   const suhuValue = Number(data.suhu || 0);
   const rhValue = Number(data.kelembapan || 0);
   const soilValue = Number(data.soil || 0);
-  const durationValue = Number(data.duration || 0);
-
-  const jam = Math.floor(durationValue / 60);
-  const menit = durationValue % 60;
 
   suhu.innerText = suhuValue.toFixed(1) + " °C";
   kelembapan.innerText = rhValue.toFixed(1) + " %";
   soil.innerText = soilValue + " %";
 
-  duration.innerText = `${String(jam).padStart(2, "0")}h ${String(menit).padStart(2, "0")}m`;
+  // ================= STATUS BERDASARKAN TIMER =================
 
-  status.innerText = data.kondisi || "-";
+  let kondisi = "Heating";
+
+  if (startTime > 0) {
+    const durationMinutes =
+      Math.floor((Date.now() - startTime) / 60000);
+
+    if (durationMinutes < 5) {
+      kondisi = "Heating";
+    } else if (durationMinutes < 30) {
+      kondisi = "Optimal";
+    } else if (durationMinutes < 45) {
+      kondisi = "Warning";
+    } else {
+      kondisi = "Danger";
+    }
+  }
+
+  status.innerHTML = `
+    ${kondisi}<br>
+    <small>${suhuValue.toFixed(1)}°C | RH ${rhValue.toFixed(1)}%</small>
+  `;
 
   // ================= NOTIFIKASI =================
 
-  if (data.kondisi === "Heating") {
+  if (kondisi === "Heating") {
     popupShown = false;
 
-    notif.innerHTML = '<i class="bi bi-fire"></i> Pemanasan Oven';
-    notif.className = "notif aman";
-  } else if (data.kondisi === "Optimal") {
-    popupShown = false;
-
-    notif.innerHTML = '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
-    notif.className = "notif aman";
-  } else if (data.kondisi === "Warning") {
     notif.innerHTML =
-      '<i class="bi bi-exclamation-triangle-fill"></i> Warning: Suhu/RH Tidak Ideal';
+      '<i class="bi bi-fire"></i> Pemanasan Oven';
+
+    notif.className = "notif aman";
+  }
+
+  else if (kondisi === "Optimal") {
+    popupShown = false;
+
+    notif.innerHTML =
+      '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
+
+    notif.className = "notif aman";
+  }
+
+  else if (kondisi === "Warning") {
+    notif.innerHTML =
+      '<i class="bi bi-exclamation-triangle-fill"></i> Warning: Waktu Pengeringan Melebihi 30 Menit';
+
     notif.className = "notif warning";
 
     if (!alarmOff && !popupShown) {
@@ -130,9 +170,12 @@ onValue(ref(db, "sensor"), (snap) => {
       popupText.innerHTML = "WARNING!";
       popupShown = true;
     }
-  } else if (data.kondisi === "Danger") {
+  }
+
+  else if (kondisi === "Danger") {
     notif.innerHTML =
-      '<i class="bi bi-exclamation-octagon-fill"></i> DANGER: Kondisi Berbahaya';
+      '<i class="bi bi-exclamation-octagon-fill"></i> DANGER: Waktu Pengeringan Melebihi 45 Menit';
+
     notif.className = "notif bahaya";
 
     if (!alarmOff && !popupShown) {
@@ -140,16 +183,8 @@ onValue(ref(db, "sensor"), (snap) => {
       popupText.innerHTML = "DANGER!";
       popupShown = true;
     }
-  } else if (data.kondisi === "Done") {
-    popupShown = false;
-
-    notif.innerHTML = '<i class="bi bi-check2-square"></i> Pengeringan Selesai';
-    notif.className = "notif aman";
-  } else {
-    notif.innerHTML = "Menunggu data...";
-    notif.className = "notif aman";
   }
-}); // <===== PENUTUP onValue SENSOR
+});
 
 // ================= STATUS BUZZER =================
 
@@ -163,13 +198,17 @@ onValue(ref(db, "control/buzzerOff"), (snap) => {
   }
 });
 
-// ================= TOMBOL =================
+// ================= TOMBOL MULAI =================
 
 window.mulaiPengeringan = function () {
   const timestamp = Date.now();
 
-  set(ref(db, "control/startTime"), timestamp);
+  set(ref(db, "sensor/startTime"), timestamp);
+
+  alert("Timer pengeringan dimulai.");
 };
+
+// ================= MATIKAN ALARM =================
 
 window.matikanBuzzer = function () {
   set(ref(db, "control/buzzerOff"), true);
