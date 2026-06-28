@@ -100,8 +100,13 @@ onValue(ref(db, "sensor"), (snap) => {
 
   soil.innerText = soilValue + " %";
 
-  status.innerHTML = `${data.kondisi}<br>
-     <small>${suhuValue.toFixed(1)}°C | RH ${rhValue.toFixed(1)}%</small>`;
+  status.innerHTML =
+    data.kondisi +
+    "<br>" +
+    suhuValue.toFixed(1) +
+    "°C | RH " +
+    rhValue.toFixed(1) +
+    "%";
 
   // ================= STATUS =================
 
