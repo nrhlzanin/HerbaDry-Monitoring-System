@@ -33,6 +33,7 @@ const clock = document.getElementById("clock");
 const suhu = document.getElementById("suhu");
 const kelembapan = document.getElementById("kelembapan");
 const soil = document.getElementById("soil");
+const duration = document.getElementById("duration");
 const status = document.getElementById("status");
 
 const notif = document.getElementById("notif");
@@ -86,6 +87,13 @@ onValue(ref(db, "sensor"), (snap) => {
   const rhValue = Number(data.kelembapan);
   const soilValue = Number(data.soil);
 
+  const durationValue = Number(data.duration || 0);
+
+  const jam = Math.floor(durationValue / 60);
+  const menit = durationValue % 60;
+
+  duration.innerText = `${String(jam).padStart(2, "0")}h ${String(menit).padStart(2, "0")}m`;
+
   suhu.innerText = suhuValue.toFixed(1) + " °C";
 
   kelembapan.innerText = rhValue.toFixed(1) + " %";
@@ -95,22 +103,18 @@ onValue(ref(db, "sensor"), (snap) => {
   status.innerHTML = `${data.kondisi}<br>
      <small>${suhuValue.toFixed(1)}°C | RH ${rhValue.toFixed(1)}%</small>`;
 
-
   // ================= STATUS =================
 
   if (data.kondisi === "Heating") {
-
     popupShown = false;
 
     notif.innerHTML = '<i class="bi bi-fire"></i> Pemanasan Oven';
 
     notif.className = "notif aman";
   } else if (data.kondisi === "Optimal") {
-
     popupShown = false;
 
-    notif.innerHTML =
-      '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
+    notif.innerHTML = '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
 
     notif.className = "notif aman";
   } else if (data.kondisi === "Warning") {
@@ -121,7 +125,6 @@ onValue(ref(db, "sensor"), (snap) => {
 
     if (document.getElementById("buzzerStatus").innerText !== "Alarm: OFF") {
       if (!alarmOff && !popupShown) {
-
         popup.classList.remove("hidden");
 
         popupText.innerHTML = "WARNING!";
@@ -136,7 +139,6 @@ onValue(ref(db, "sensor"), (snap) => {
     notif.className = "notif bahaya";
 
     if (!alarmOff && !popupShown) {
-
       popup.classList.remove("hidden");
 
       popupText.innerHTML = "DANGER!";
@@ -144,11 +146,9 @@ onValue(ref(db, "sensor"), (snap) => {
       popupShown = true;
     }
   } else if (data.kondisi === "Done") {
-
     popupShown = false;
 
-    notif.innerHTML =
-      '<i class="bi bi-check2-square"></i> Pengeringan Selesai';
+    notif.innerHTML = '<i class="bi bi-check2-square"></i> Pengeringan Selesai';
 
     notif.className = "notif aman";
   }
@@ -169,7 +169,6 @@ onValue(ref(db, "control/buzzerOff"), (snap) => {
 // ================= TOMBOL =================
 
 window.matikanBuzzer = function () {
-
   set(ref(db, "control/buzzerOff"), true);
 
   popup.classList.add("hidden");
@@ -186,16 +185,13 @@ setInterval(() => {
 }, 3000);
 
 setInterval(() => {
-
   const diff = Date.now() - lastUpdate;
 
   if (diff > 10000) {
-
     espStatus.innerText = "ESP32 Offline";
 
     espStatus.className = "esp-status esp-offline";
 
     wifiIcon.className = "wifi-icon wifi-offline";
   }
-
 }, 2000);

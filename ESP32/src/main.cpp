@@ -22,7 +22,9 @@ FirebaseAuth auth;
 FirebaseConfig config;
 
 DHT dht(DHTPIN, DHTTYPE);
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+// LCD 20x4
+LiquidCrystal_I2C lcd(0x27, 20, 4);
 
 // ================= SOIL =================
 const int soilDry = 3200;
@@ -52,6 +54,10 @@ float h = 0;
 int soil = 0;
 String kondisi = "Heating";
 
+bool dryingStarted = false;
+unsigned long dryingStartTime = 0;
+unsigned long dryingMinutes = 0;
+
 // ================= BUZZER =================
 bool buzzerOff = false;
 unsigned long snoozeStart = 0;
@@ -62,28 +68,50 @@ const unsigned long snoozeDuration = 120000;
 // =========================================
 void connectWiFi()
 {
-    WiFiManager wm;
+  WiFiManager wm;
 
+  lcd.clear();
+  lcd.setCursor(0, 0);
+  lcd.print("Connect to WiFi");
+
+  lcd.setCursor(0, 1);
+  lcd.print("SSID:HerbaDry_Setup");
+
+  lcd.setCursor(0, 2);
+  lcd.print("PASS:12345678");
+
+  lcd.setCursor(0, 3);
+  lcd.print("Open 192.168.4.1");
+
+  bool ok = wm.autoConnect(
+      "HerbaDry_Setup",
+      "12345678");
+
+  if (!ok)
+  {
     lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Setup WiFi");
     lcd.setCursor(0, 1);
-    lcd.print("192.168.4.1");
+    lcd.print("WiFi Failed");
 
-    bool ok = wm.autoConnect("HerbaDry_Setup", "12345678");
-
-    if (!ok)
-    {
-        ESP.restart();
-    }
-
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("WiFi Connected");
-    lcd.setCursor(0, 1);
-    lcd.print(WiFi.localIP());
+    lcd.setCursor(0, 2);
+    lcd.print("Restarting...");
 
     delay(2000);
+    ESP.restart();
+  }
+
+  lcd.clear();
+
+  lcd.setCursor(0, 0);
+  lcd.print("WiFi Connected");
+
+  lcd.setCursor(0, 1);
+  lcd.print("IP Address:");
+
+  lcd.setCursor(0, 2);
+  lcd.print(WiFi.localIP());
+
+  delay(3000);
 }
 
 // =========================================
@@ -91,15 +119,15 @@ void connectWiFi()
 // =========================================
 void initFirebase()
 {
-    config.api_key = API_KEY;
-    config.database_url = DATABASE_URL;
+  config.api_key = API_KEY;
+  config.database_url = DATABASE_URL;
 
-    config.signer.test_mode = true;
+  config.signer.test_mode = true;
 
-    Firebase.begin(&config, &auth);
-    Firebase.reconnectWiFi(true);
+  Firebase.begin(&config, &auth);
+  Firebase.reconnectWiFi(true);
 
-    Serial.println("Firebase Connected");
+  Serial.println("Firebase Connected");
 }
 
 // =========================================
@@ -107,36 +135,36 @@ void initFirebase()
 // =========================================
 void readSensor()
 {
-    float temp = dht.readTemperature();
-    float hum = dht.readHumidity();
+  float temp = dht.readTemperature();
+  float hum = dht.readHumidity();
 
-    Serial.println("===== DHT READ =====");
+  Serial.println("===== DHT READ =====");
 
-    Serial.print("Temp RAW = ");
-    Serial.println(temp);
+  Serial.print("Temp RAW = ");
+  Serial.println(temp);
 
-    Serial.print("Hum RAW = ");
-    Serial.println(hum);
+  Serial.print("Hum RAW = ");
+  Serial.println(hum);
 
-    if (!isnan(temp))
-        t = temp;
+  if (!isnan(temp))
+    t = temp;
 
-    if (!isnan(hum))
-        h = hum;
+  if (!isnan(hum))
+    h = hum;
 
-    int raw = analogRead(SOIL_PIN);
+  int raw = analogRead(SOIL_PIN);
 
-    soil = map(raw, soilDry, soilWet, 0, 100);
-    soil = constrain(soil, 0, 100);
+  soil = map(raw, soilDry, soilWet, 0, 100);
+  soil = constrain(soil, 0, 100);
 
-    Serial.print("T = ");
-    Serial.println(t);
+  Serial.print("T = ");
+  Serial.println(t);
 
-    Serial.print("H = ");
-    Serial.println(h);
+  Serial.print("H = ");
+  Serial.println(h);
 
-    Serial.print("Soil = ");
-    Serial.println(soil);
+  Serial.print("Soil = ");
+  Serial.println(soil);
 }
 
 // =========================================
@@ -144,111 +172,162 @@ void readSensor()
 // =========================================
 void checkCondition()
 {
-    // selesai pengeringan
-    if (soil <= 10)
-    {
-        kondisi = "Done";
-        return;
-    }
+  // Validasi akhir kadar air
+  if (soil <= 10)
+  {
+    kondisi = "Done";
+    return;
+  }
 
-    // kondisi bahaya
-    if (t >= 70 || h >= 80)
-    {
-        kondisi = "Danger";
-    }
+  // Danger
+  if (
+      t >= 70 ||
+      h >= 80 ||
+      dryingMinutes > 45)
+  {
+    kondisi = "Danger";
+  }
 
-    // kondisi warning
-    else if (
-        (t >= 65 && t < 70) ||
-        (h > 55 && h < 80) ||
-        (h < 25))
-    {
-        kondisi = "Warning";
-    }
+  // Warning
+  else if (
+      (t >= 65 && t < 70) ||
+      h > 55 ||
+      dryingMinutes > 30)
+  {
+    kondisi = "Warning";
+  }
 
-    // kondisi optimal
-    else if (
-        t >= 60 &&
-        t <= 65 &&
-        h >= 30 &&
-        h <= 55)
-    {
-        kondisi = "Optimal";
-    }
+  // Ready Check
+  else if (
+      dryingMinutes >= 20 &&
+      t >= 55 &&
+      t <= 65 &&
+      h <= 40)
+  {
+    kondisi = "Ready Check";
+  }
 
-    // pemanasan
-    else
-    {
-        kondisi = "Heating";
-    }
+  // Optimal
+  else if (
+      t >= 55 &&
+      t <= 65 &&
+      h >= 30 &&
+      h <= 55)
+  {
+    kondisi = "Optimal";
+  }
+
+  // Heating
+  else if (
+      t < 50 ||
+      dryingMinutes < 5)
+  {
+    kondisi = "Heating";
+  }
+
+  else
+  {
+    kondisi = "Heating";
+  }
 }
-
 // =========================================
-// LCD
+// LCD 20x4
 // =========================================
 void updateLCD()
 {
-    lcd.clear();
+  lcd.clear();
 
-    lcd.setCursor(0, 0);
-    lcd.print("T:");
-    lcd.print(t, 0);
-    lcd.print("C");
+  int hours = dryingMinutes / 60;
+  int minutes = dryingMinutes % 60;
 
-    lcd.setCursor(8, 0);
-    lcd.print("H:");
-    lcd.print(h, 0);
-    lcd.print("%");
+  lcd.setCursor(0, 0);
+  lcd.print("T:");
+  lcd.print(t, 1);
+  lcd.print((char)223);
+  lcd.print("C");
 
-    lcd.setCursor(0, 1);
-    lcd.print("M:");
-    lcd.print(soil);
-    lcd.print("%");
+  lcd.setCursor(11, 0);
+  lcd.print("RH:");
+  lcd.print(h, 0);
+  lcd.print("%");
 
-    if (kondisi == "Done")
-        lcd.print(" DONE");
-    else if (kondisi == "Optimal")
-        lcd.print(" OPT");
-    else if (kondisi == "Warning")
-        lcd.print(" WARN");
-    else if (kondisi == "Danger")
-        lcd.print(" DANG");
-    else
-        lcd.print(" HEAT");
+  lcd.setCursor(0, 1);
+  lcd.print("Moist:");
+  lcd.print(soil);
+  lcd.print("%");
+
+  lcd.setCursor(0, 2);
+  lcd.print("Time:");
+
+  if (hours < 10)
+    lcd.print("0");
+  lcd.print(hours);
+
+  lcd.print("h ");
+
+  if (minutes < 10)
+    lcd.print("0");
+  lcd.print(minutes);
+
+  lcd.print("m");
+
+  lcd.setCursor(0, 3);
+  lcd.print("Status:");
+
+  if (kondisi == "Done")
+    lcd.print("DONE");
+  else if (kondisi == "Ready Check")
+    lcd.print("READY");
+  else if (kondisi == "Optimal")
+    lcd.print("OPTIMAL");
+  else if (kondisi == "Warning")
+    lcd.print("WARNING");
+  else if (kondisi == "Danger")
+    lcd.print("DANGER");
+  else
+    lcd.print("HEATING");
 }
-
 // =========================================
 // FIREBASE SEND
 // =========================================
 void sendFirebase()
 {
-    Serial.println("=== FIREBASE SEND ===");
+  Serial.println("=== FIREBASE SEND ===");
 
-    if (Firebase.RTDB.setFloat(&fbdo, "/sensor/suhu", t))
-        Serial.println("Suhu OK");
-    else
-        Serial.println(fbdo.errorReason());
+  if (Firebase.RTDB.setFloat(&fbdo, "/sensor/suhu", t))
+    Serial.println("Suhu OK");
+  else
+    Serial.println(fbdo.errorReason());
 
-    if (Firebase.RTDB.setFloat(&fbdo, "/sensor/kelembapan", h))
-        Serial.println("RH OK");
-    else
-        Serial.println(fbdo.errorReason());
+  if (Firebase.RTDB.setFloat(&fbdo, "/sensor/kelembapan", h))
+    Serial.println("RH OK");
+  else
+    Serial.println(fbdo.errorReason());
 
-    if (Firebase.RTDB.setInt(&fbdo, "/sensor/soil", soil))
-        Serial.println("Soil OK");
-    else
-        Serial.println(fbdo.errorReason());
+  if (Firebase.RTDB.setInt(&fbdo, "/sensor/soil", soil))
+    Serial.println("Soil OK");
+  else
+    Serial.println(fbdo.errorReason());
+  if (Firebase.RTDB.setInt(&fbdo, "/sensor/duration", dryingMinutes))
+    Serial.println("Duration OK");
+  else
+    Serial.println(fbdo.errorReason());
+  if (Firebase.RTDB.setString(&fbdo, "/sensor/kondisi", kondisi))
+    Serial.println("Status OK");
+  else
+    Serial.println(fbdo.errorReason());
 
-    if (Firebase.RTDB.setString(&fbdo, "/sensor/kondisi", kondisi))
-        Serial.println("Status OK");
-    else
-        Serial.println(fbdo.errorReason());
-
-    if (Firebase.RTDB.setString(&fbdo, "/sensor/ip",
-                                WiFi.localIP().toString()))
-        Serial.println("IP OK");
-    else
-        Serial.println(fbdo.errorReason());
+  if (Firebase.RTDB.setString(
+          &fbdo,
+          "/sensor/ip",
+          WiFi.localIP().toString()))
+  {
+    Serial.println("IP OK");
+  }
+  else
+  {
+    Serial.println(fbdo.errorReason());
+  }
 }
 
 // =========================================
@@ -256,16 +335,16 @@ void sendFirebase()
 // =========================================
 void readControl()
 {
-    if (Firebase.RTDB.getBool(&fbdo, "/control/buzzerOff"))
-    {
-        bool val = fbdo.boolData();
+  if (Firebase.RTDB.getBool(&fbdo, "/control/buzzerOff"))
+  {
+    bool val = fbdo.boolData();
 
-        if (val)
-        {
-            buzzerOff = true;
-            snoozeStart = millis();
-        }
+    if (val)
+    {
+      buzzerOff = true;
+      snoozeStart = millis();
     }
+  }
 }
 
 // =========================================
@@ -273,17 +352,17 @@ void readControl()
 // =========================================
 void checkSnooze()
 {
-    if (
-        buzzerOff &&
-        millis() - snoozeStart >= snoozeDuration)
-    {
-        buzzerOff = false;
+  if (
+      buzzerOff &&
+      millis() - snoozeStart >= snoozeDuration)
+  {
+    buzzerOff = false;
 
-        Firebase.RTDB.setBool(
-            &fbdo,
-            "/control/buzzerOff",
-            false);
-    }
+    Firebase.RTDB.setBool(
+        &fbdo,
+        "/control/buzzerOff",
+        false);
+  }
 }
 
 // =========================================
@@ -291,34 +370,34 @@ void checkSnooze()
 // =========================================
 void updateBuzzer()
 {
-    if (buzzerOff)
-    {
-        digitalWrite(BUZZER, LOW);
-        return;
-    }
+  if (buzzerOff)
+  {
+    digitalWrite(BUZZER, LOW);
+    return;
+  }
 
-    if (kondisi == "Heating")
-        return;
+  if (kondisi == "Heating")
+    return;
 
-    int interval = 5000;
+  int interval = 5000;
 
-    if (kondisi == "Optimal")
-        interval = 5000;
+  if (kondisi == "Optimal")
+    interval = 5000;
 
-    if (kondisi == "Warning")
-        interval = 2000;
+  if (kondisi == "Warning")
+    interval = 2000;
 
-    if (kondisi == "Danger")
-        interval = 500;
+  if (kondisi == "Danger")
+    interval = 500;
 
-    if (millis() - lastBuzz >= interval)
-    {
-        lastBuzz = millis();
+  if (millis() - lastBuzz >= interval)
+  {
+    lastBuzz = millis();
 
-        digitalWrite(BUZZER, HIGH);
-        delay(150);
-        digitalWrite(BUZZER, LOW);
-    }
+    digitalWrite(BUZZER, HIGH);
+    delay(150);
+    digitalWrite(BUZZER, LOW);
+  }
 }
 
 // =========================================
@@ -326,18 +405,18 @@ void updateBuzzer()
 // =========================================
 void setup()
 {
-    Serial.begin(115200);
+  Serial.begin(115200);
 
-    pinMode(BUZZER, OUTPUT);
-    digitalWrite(BUZZER, LOW);
+  pinMode(BUZZER, OUTPUT);
+  digitalWrite(BUZZER, LOW);
 
-    dht.begin();
+  dht.begin();
 
-    lcd.init();
-    lcd.backlight();
+  lcd.init();
+  lcd.backlight();
 
-    connectWiFi();
-    initFirebase();
+  connectWiFi();
+  initFirebase();
 }
 
 // =========================================
@@ -345,37 +424,57 @@ void setup()
 // =========================================
 void loop()
 {
-    unsigned long now = millis();
+  unsigned long now = millis();
 
-    if (now - lastRead >= sensorInterval)
+  if (now - lastRead >= sensorInterval)
+  {
+    lastRead = now;
+
+    readSensor();
+
+    // mulai timer ketika suhu mulai naik
+    if (!dryingStarted && t >= 50 && h <= 55)
     {
-        lastRead = now;
+      dryingStarted = true;
+      dryingStartTime = millis();
 
-        readSensor();
-        checkCondition();
-        updateLCD();
-
-        Serial.print("T=");
-        Serial.print(t);
-
-        Serial.print(" H=");
-        Serial.print(h);
-
-        Serial.print(" Soil=");
-        Serial.print(soil);
-
-        Serial.print("% Status=");
-        Serial.println(kondisi);
+      Serial.println("Drying process started");
     }
 
-    if (now - lastSend >= firebaseInterval)
+    if (dryingStarted)
     {
-        lastSend = now;
-
-        sendFirebase();
-        readControl();
+      dryingMinutes =
+          (millis() - dryingStartTime) / 60000;
     }
 
-    checkSnooze();
-    updateBuzzer();
+    checkCondition();
+    updateLCD();
+
+    Serial.print("T=");
+    Serial.print(t);
+
+    Serial.print(" H=");
+    Serial.print(h);
+
+    Serial.print(" Soil=");
+    Serial.print(soil);
+
+    Serial.print("% Time=");
+    Serial.print(dryingMinutes);
+    Serial.print("min");
+
+    Serial.print(" Status=");
+    Serial.println(kondisi);
+  }
+
+  if (now - lastSend >= firebaseInterval)
+  {
+    lastSend = now;
+
+    sendFirebase();
+    readControl();
+  }
+
+  checkSnooze();
+  updateBuzzer();
 }

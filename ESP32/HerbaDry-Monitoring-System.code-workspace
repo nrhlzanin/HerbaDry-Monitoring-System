@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "HerbaDry-Monitoring-System",
+			"path": "C:/Users/User/Documents/PlatformIO/Projects/HerbaDry-Monitoring-System"
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "HerbaDry-Monitoring-System"
+	}
+}

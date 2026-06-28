@@ -1,112 +1,98 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HerbaDry Monitoring</title>
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HerbaDry Monitoring</title>
+    <link rel="stylesheet" href="style.css" />
 
-  <link rel="stylesheet" href="style.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
 
-  <link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
 
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
+  <body>
+    <div class="topbar">
+      <div class="brand">
+        <i class="fas fa-seedling"></i>
+        <div>
+          <span>HerbaDry Monitoring</span>
+          <small>IoT Herbal Drying Monitoring System</small>
+        </div>
+      </div>
 
-<body>
+      <div class="top-right">
+        <div class="clock" id="clock">00:00:00</div>
 
-  <div class="topbar">
+        <div class="esp-status esp-offline" id="espStatus">ESP32 Offline</div>
 
-    <div class="brand">
-      <i class="fas fa-seedling"></i>
-      <span>HerbaDry Monitoring</span>
+        <div class="wifi-icon wifi-offline" id="wifiIcon">
+          <i class="bi bi-wifi"></i>
+        </div>
+      </div>
     </div>
 
-    <div class="top-right">
+    <div class="container">
+      <div id="notif" class="notif aman">Menunggu data...</div>
 
-      <div class="clock" id="clock">
-        00:00:00
+      <div class="grid">
+        <div class="card">
+          <i class="fas fa-temperature-high card-icon"></i>
+          <h3>Suhu</h3>
+          <p id="suhu">--</p>
+        </div>
+
+        <div class="card">
+          <i class="fas fa-water card-icon"></i>
+          <h3>Kelembapan</h3>
+          <p id="kelembapan">--</p>
+        </div>
+
+        <div class="card">
+          <i class="fas fa-seedling card-icon"></i>
+          <h3>Moisture</h3>
+          <p id="soil">--</p>
+        </div>
+
+        <div class="card">
+          <i class="fas fa-clock card-icon"></i>
+          <h3>Durasi Pengeringan</h3>
+          <p id="duration">00h 00m</p>
+        </div>
+
+        <div class="card status-card">
+          <i class="fas fa-heartbeat card-icon"></i>
+          <h3>Status Sistem</h3>
+          <p id="status">--</p>
+        </div>
       </div>
 
-      <div class="esp-status esp-offline" id="espStatus">
-        ESP32 Offline
-      </div>
+      <div class="card control">
+        <i class="fas fa-bell"></i>
 
-      <div class="wifi-icon wifi-offline" id="wifiIcon">
-        <i class="bi bi-wifi"></i>
-      </div>
+        <h3>Alarm Control</h3>
 
+        <button onclick="matikanBuzzer()">Matikan Alarm</button>
+
+        <p id="buzzerStatus">Alarm: ON</p>
+      </div>
     </div>
 
-  </div>
+    <div id="popup" class="popup hidden">
+      <div class="popup-box">
+        <h2 id="popupText">ALERT</h2>
 
-  <div class="container">
-
-    <div id="notif" class="notif aman">
-      Menunggu data...
+        <button onclick="matikanBuzzer()">OFF Alarm</button>
+      </div>
     </div>
 
-    <div class="grid">
-
-      <div class="card">
-        <h3>Suhu</h3>
-        <p id="suhu">--</p>
-      </div>
-
-      <div class="card">
-        <h3>Kelembapan</h3>
-        <p id="kelembapan">--</p>
-      </div>
-
-      <div class="card">
-        <h3>Moisture</h3>
-        <p id="soil">--</p>
-      </div>
-
-      <div class="card">
-        <h3>Status Sistem</h3>
-        <p id="status">--</p>
-      </div>
-
-    </div>
-
-    <div class="card control">
-
-      <i class="fas fa-bell"></i>
-
-      <h3>Alarm Control</h3>
-
-      <button onclick="matikanBuzzer()">
-        Matikan Alarm
-      </button>
-
-      <p id="buzzerStatus">
-        Alarm: ON
-      </p>
-
-    </div>
-
-  </div>
-
-  <div id="popup" class="popup hidden">
-
-    <div class="popup-box">
-
-      <h2 id="popupText">
-        ALERT
-      </h2>
-
-      <button onclick="matikanBuzzer()">
-        OFF Alarm
-      </button>
-
-    </div>
-
-  </div>
-
-  <script type="module" src="app.js"></script>
-
-</body>
+    <script type="module" src="app.js"></script>
+  </body>
 </html>
