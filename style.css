@@ -119,23 +119,10 @@ margin:auto;
 padding:25px;
 }
 
-h1{
-text-align:center;
-margin-bottom:25px;
-}
-
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
 gap:20px;
-}
-
-.card{
-background:#1e293b;
-padding:25px;
-border-radius:18px;
-text-align:center;
-box-shadow:0 10px 20px rgba(0,0,0,.3);
 }
 
 .card p{
@@ -155,22 +142,64 @@ font-weight:bold;
 .warning{background:#78350f;}
 .bahaya{background:#7f1d1d;}
 
-button{
-padding:12px 22px;
-border:none;
-border-radius:12px;
-background:#ef4444;
-color:white;
-font-weight:bold;
-cursor:pointer;
-}
-
-button:hover{
-opacity:.85;
-}
-
 .control{
-margin-top:25px;
+  margin-top:25px;
+  text-align:center;
+}
+
+.control-buttons{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  margin-top:20px;
+}
+
+.start-stop-group{
+  display:flex;
+  gap:12px;
+}
+
+.start-stop-group button{
+  flex:1;
+}
+
+.control-buttons button{
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.25s;
+}
+
+.control-buttons button:hover{
+  transform:translateY(-2px);
+  opacity:.9;
+}
+
+.btn-start{
+  background:#22c55e;
+  color:white;
+}
+
+.btn-stop{
+  background:#ef4444;
+  color:white;
+}
+
+.btn-alarm{
+  background:#f59e0b;
+  color:white;
+}
+
+.control-buttons button i{
+  margin-right:8px;
+}
+
+#buzzerStatus{
+  margin-top:15px;
+  font-weight:bold;
 }
 
 .popup{

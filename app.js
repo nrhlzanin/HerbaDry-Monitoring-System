@@ -45,7 +45,6 @@ const popupText = document.getElementById("popupText");
 let alarmOff = false;
 let lastUpdate = Date.now();
 let popupShown = false;
-let startTime = 0;
 
 // ================= JAM =================
 
@@ -73,31 +72,6 @@ onValue(ref(db, "sensor/ip"), (snap) => {
   }
 });
 
-// ================= AMBIL START TIME =================
-
-onValue(ref(db, "sensor/startTime"), (snap) => {
-  if (snap.exists()) {
-    startTime = snap.val();
-  }
-});
-
-// ================= TIMER REALTIME =================
-
-setInterval(() => {
-  if (startTime > 0) {
-    const durationMinutes =
-      Math.floor((Date.now() - startTime) / 60000);
-
-    const jam = Math.floor(durationMinutes / 60);
-    const menit = durationMinutes % 60;
-
-    duration.innerText =
-      `${String(jam).padStart(2, "0")}h ${String(menit).padStart(2, "0")}m`;
-  } else {
-    duration.innerText = "00h 00m";
-  }
-}, 1000);
-
 // ================= DATA SENSOR =================
 
 onValue(ref(db, "sensor"), (snap) => {
@@ -115,53 +89,48 @@ onValue(ref(db, "sensor"), (snap) => {
   kelembapan.innerText = rhValue.toFixed(1) + " %";
   soil.innerText = soilValue + " %";
 
-  // ================= STATUS BERDASARKAN TIMER =================
+  const durationValue = Number(data.duration || 0);
 
-  let kondisi = "Heating";
+  const jam = Math.floor(durationValue / 60);
+  const menit = durationValue % 60;
 
-  if (startTime > 0) {
-    const durationMinutes =
-      Math.floor((Date.now() - startTime) / 60000);
+  duration.innerText = `${String(jam).padStart(2, "0")}h ${String(menit).padStart(2, "0")}m`;
 
-    if (durationMinutes < 5) {
-      kondisi = "Heating";
-    } else if (durationMinutes < 30) {
-      kondisi = "Optimal";
-    } else if (durationMinutes < 45) {
-      kondisi = "Warning";
-    } else {
-      kondisi = "Danger";
-    }
-  }
+  // ================= STATUS DARI ESP32 =================
 
-  status.innerHTML = `
-    ${kondisi}<br>
-    <small>${suhuValue.toFixed(1)}°C | RH ${rhValue.toFixed(1)}%</small>
-  `;
+  const kondisi = data.kondisi || "Heating";
+
+  status.innerText = kondisi;
 
   // ================= NOTIFIKASI =================
 
   if (kondisi === "Heating") {
     popupShown = false;
 
-    notif.innerHTML =
-      '<i class="bi bi-fire"></i> Pemanasan Oven';
+    notif.innerHTML = '<i class="bi bi-fire"></i> Pemanasan Oven';
 
     notif.className = "notif aman";
-  }
-
-  else if (kondisi === "Optimal") {
+  } else if (kondisi === "Optimal") {
     popupShown = false;
 
-    notif.innerHTML =
-      '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
+    notif.innerHTML = '<i class="bi bi-check-circle-fill"></i> Kondisi Optimal';
 
     notif.className = "notif aman";
-  }
+  } else if (kondisi === "Ready Check") {
+    popupShown = false;
 
-  else if (kondisi === "Warning") {
+    notif.innerHTML = '<i class="bi bi-search"></i> Produk siap diperiksa';
+
+    notif.className = "notif aman";
+  } else if (kondisi === "Done") {
+    popupShown = false;
+
+    notif.innerHTML = '<i class="bi bi-check2-all"></i> Pengeringan Selesai';
+
+    notif.className = "notif aman";
+  } else if (kondisi === "Warning") {
     notif.innerHTML =
-      '<i class="bi bi-exclamation-triangle-fill"></i> Warning: Waktu Pengeringan Melebihi 30 Menit';
+      '<i class="bi bi-exclamation-triangle-fill"></i> Kondisi Warning Terdeteksi';
 
     notif.className = "notif warning";
 
@@ -170,11 +139,9 @@ onValue(ref(db, "sensor"), (snap) => {
       popupText.innerHTML = "WARNING!";
       popupShown = true;
     }
-  }
-
-  else if (kondisi === "Danger") {
+  } else if (kondisi === "Danger") {
     notif.innerHTML =
-      '<i class="bi bi-exclamation-octagon-fill"></i> DANGER: Waktu Pengeringan Melebihi 45 Menit';
+      '<i class="bi bi-exclamation-octagon-fill"></i> Kondisi Bahaya Terdeteksi';
 
     notif.className = "notif bahaya";
 
@@ -201,11 +168,13 @@ onValue(ref(db, "control/buzzerOff"), (snap) => {
 // ================= TOMBOL MULAI =================
 
 window.mulaiPengeringan = function () {
-  const timestamp = Date.now();
-
-  set(ref(db, "sensor/startTime"), timestamp);
+  set(ref(db, "control/startDrying"), true);
 
   alert("Timer pengeringan dimulai.");
+};
+
+window.stopPengeringan = function () {
+  set(ref(db, "control/startDrying"), false);
 };
 
 // ================= MATIKAN ALARM =================

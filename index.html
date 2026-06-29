@@ -74,13 +74,28 @@
       </div>
 
       <div class="card control">
-        <i class="fas fa-bell"></i>
+        <i class="fas fa-sliders-h card-icon"></i>
 
-        <h3>Control</h3>
+        <h3>Control Panel</h3>
 
-        <button onclick="mulaiPengeringan()">Mulai Pengeringan</button>
+        <div class="control-buttons">
+          <div class="start-stop-group">
+            <button class="btn-start" onclick="mulaiPengeringan()">
+              <i class="fas fa-play"></i>
+              Mulai
+            </button>
 
-        <button onclick="matikanBuzzer()">Matikan Alarm</button>
+            <button class="btn-stop" onclick="stopPengeringan()">
+              <i class="fas fa-stop"></i>
+              Stop
+            </button>
+          </div>
+
+          <button class="btn-alarm" onclick="matikanBuzzer()">
+            <i class="fas fa-bell-slash"></i>
+            Matikan Alarm
+          </button>
+        </div>
 
         <p id="buzzerStatus">Alarm: ON</p>
       </div>
