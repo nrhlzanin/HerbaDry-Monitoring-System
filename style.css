@@ -1,1010 +1,397 @@
-/* =====================================================
-   HERBADRY MONITORING DASHBOARD
-===================================================== */
+/* ==========================================================
+   HERBADRY MONITORING SYSTEM
+   DASHBOARD CSS
+========================================================== */
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
-}
-
-body{
-
-    background:#eef3f8;
-
-    color:#333;
-
-    min-height:100vh;
-
-}
-
-/* ==========================================
-                HEADER
-========================================== */
-
-header{
-
-    width:100%;
-
-    background:#0F4C81;
-
-    color:white;
-
-    padding:18px 40px;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    flex-wrap:wrap;
-
-    box-shadow:0 4px 15px rgba(0,0,0,.15);
-
-}
-
-.logo{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:15px;
-
-}
-
-.logo i{
-
-    font-size:45px;
-
-}
-
-.logo h2{
-
-    font-size:28px;
-
-    font-weight:700;
-
-}
-
-.logo span{
-
-    font-size:14px;
-
-    opacity:.9;
-
-}
-
-.header-right{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:18px;
-
-}
-
-/* ==========================================
-                CLOCK
-========================================== */
-
-.clock-box{
-
-    background:white;
-
-    color:#0F4C81;
-
-    padding:10px 18px;
-
-    border-radius:12px;
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    font-weight:bold;
-
-    font-size:18px;
-
-    box-shadow:0 5px 15px rgba(0,0,0,.15);
-
-}
-
-/* ==========================================
-                ESP STATUS
-========================================== */
-
-.status{
-
-    padding:10px 20px;
-
-    border-radius:10px;
-
-    color:white;
-
-    font-weight:bold;
-
-    min-width:145px;
-
-    text-align:center;
-
-}
-
-.online{
-
-    background:#2ecc71;
-
-}
-
-.offline{
-
-    background:#e74c3c;
-
-}
-
-/* ==========================================
-                WIFI ICON
-========================================== */
-
-.wifi{
-
-    width:48px;
-
-    height:48px;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    border-radius:50%;
-
-    background:white;
-
-    font-size:22px;
-
-    box-shadow:0 5px 15px rgba(0,0,0,.15);
-
-}
-
-.wifi.online{
-
-    color:#2ecc71;
-
-}
-
-.wifi.offline{
-
-    color:#e74c3c;
-
-}
-
-/* ==========================================
-                NOTIFICATION
-========================================== */
-
-.notif{
-
-    margin:25px auto;
-
-    width:92%;
-
-    padding:15px;
-
-    text-align:center;
-
-    border-radius:12px;
-
-    font-size:18px;
-
-    font-weight:bold;
-
-    background:#3498db;
-
-    color:white;
-
-    box-shadow:0 5px 12px rgba(0,0,0,.15);
-
-}
-
-/* ==========================================
-            SENSOR CARD
-========================================== */
-
-.card-grid{
-
-    width:92%;
-
-    margin:auto;
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-
-    gap:22px;
-
-}
-
-.card{
-
-    background:white;
-
-    border-radius:18px;
-
-    padding:28px;
-
-    text-align:center;
-
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
-
-    transition:.3s;
-
-}
-
-.card:hover{
-
-    transform:translateY(-5px);
-
-}
-
-.card i{
-
-    font-size:42px;
-
-    color:#0F4C81;
-
-    margin-bottom:18px;
-
-}
-
-.card h3{
-
-    font-size:19px;
-
-    margin-bottom:12px;
-
-    color:#555;
-
-}
-
-.card p{
-
-    font-size:34px;
-
-    font-weight:bold;
-
-    color:#0F4C81;
-
-}
-
-/* ==========================================
-            STATUS GRID
-========================================== */
-
-.status-grid{
-
-    width:92%;
-
-    margin:30px auto;
-
-    display:grid;
-
-    grid-template-columns:repeat(auto-fit,minmax(350px,1fr));
-
-    gap:22px;
-
-}
-
-.status-card{
-
-    text-align:left;
-
-}
-
-.status-card h3{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    margin-bottom:20px;
-
-    color:#0F4C81;
-
-}
-
-.status-text{
-
-    font-size:30px;
-
-    font-weight:bold;
-
-    text-align:center;
-
-    padding:20px;
-
-    border-radius:12px;
-
-    background:#ecf0f1;
-
-    color:#2c3e50;
-
-}
-
-/* ==========================================
-            STATUS GAS
-========================================== */
-
-#gasStatus{
-
-    font-size:34px;
-
-    font-weight:bold;
-
-    text-align:center;
-
-    padding:18px;
-
-    border-radius:12px;
-
-    color:white;
-
-}
-
-.gas-on{
-
-    background:#27ae60;
-
-}
-
-.gas-off{
-
-    background:#c0392b;
-
-}
-
-/* ==========================================
-            CHART
-========================================== */
-
-.chart-card{
-
-    width:92%;
-
-    margin:30px auto;
-
-    background:white;
-
-    border-radius:18px;
-
-    padding:25px;
-
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
-
-}
-
-.chart-header{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin-bottom:20px;
-
-}
-
-.chart-header h3{
-
-    color:#0F4C81;
-
-    font-size:24px;
-
-}
-
-.chart-card canvas{
-
-    width:100% !important;
-
-    height:380px !important;
-
-}
-
-/* ==========================================
-            INFORMASI SISTEM
-========================================== */
-
-.info-grid{
-
-    width:92%;
-
-    margin:30px auto;
-
-}
-
-.info-grid .card{
-
-    text-align:left;
-
-}
-
-.info-grid h3{
-
-    color:#0F4C81;
-
-    margin-bottom:20px;
-
-}
-
-.info-grid table{
-
-    width:100%;
-
-    border-collapse:collapse;
-
-}
-
-.info-grid td{
-
-    padding:14px;
+/* =========================
+   GLOBAL
+========================= */
 
-    border-bottom:1px solid #ddd;
-
-    font-size:16px;
-
-}
-
-.info-grid td:first-child{
-
-    font-weight:600;
-
-    color:#444;
-
-}
-
-.info-grid td:last-child{
-
-    text-align:right;
-
-    color:#0F4C81;
-
-    font-weight:bold;
-
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
-
-/* ==========================================
-            BADGE
-========================================== */
-
-.badge{
-
-    display:inline-block;
-
-    padding:8px 14px;
-
-    border-radius:30px;
 
-    color:white;
+body {
+  margin: 0;
 
-    font-size:14px;
+  background: #f4f7f6;
 
-    font-weight:bold;
-
+  color: #333;
 }
 
-.badge-green{
+/* =========================
+   HEADER
+========================= */
 
-    background:#27ae60;
-
-}
+header {
+  width: 100%;
 
-.badge-yellow{
+  background: #2e7d32;
 
-    background:#f39c12;
+  color: white;
 
-}
+  padding: 20px 40px;
 
-.badge-red{
+  display: flex;
 
-    background:#e74c3c;
+  justify-content: space-between;
 
+  align-items: center;
 }
-
-/* ==========================================
-            LAST UPDATE
-========================================== */
 
-#lastUpdate{
+.logo {
+  display: flex;
 
-    color:#2980b9;
+  align-items: center;
 
+  gap: 15px;
 }
-
-#ip{
-
-    color:#16a085;
 
+.logo i {
+  font-size: 45px;
 }
 
-#alarmStatus{
+.logo h2 {
+  margin: 0;
 
-    color:#e67e22;
-
+  font-size: 25px;
 }
-
-/* ==========================================
-            ANIMATION
-========================================== */
-
-@keyframes fadeIn{
-
-    from{
-
-        opacity:0;
-
-        transform:translateY(15px);
 
-    }
+.logo span {
+  font-size: 14px;
 
-    to{
-
-        opacity:1;
-
-        transform:translateY(0);
-
-    }
-
+  opacity: 0.9;
 }
 
-.card{
+.header-right {
+  display: flex;
 
-    animation:fadeIn .6s ease;
+  align-items: center;
 
+  gap: 15px;
 }
-
-/* ==========================================
-            CONTROL PANEL
-========================================== */
-
-.control-panel{
 
-    width:92%;
+.clock-box {
+  background: white;
 
-    margin:35px auto;
+  color: #333;
 
-    background:#ffffff;
+  padding: 10px 15px;
 
-    border-radius:18px;
+  border-radius: 12px;
 
-    padding:30px;
+  display: flex;
 
-    text-align:center;
+  align-items: center;
 
-    box-shadow:0 8px 20px rgba(0,0,0,.08);
-
-}
-
-.control-panel h2{
-
-    color:#0F4C81;
-
-    margin-bottom:25px;
-
-    font-size:28px;
-
+  gap: 8px;
 }
-
-.button-group{
-
-    display:flex;
 
-    justify-content:center;
+/* =========================
+   ESP STATUS
+========================= */
 
-    gap:20px;
+.esp-status {
+  padding: 10px 15px;
 
-    flex-wrap:wrap;
+  border-radius: 20px;
 
+  font-weight: bold;
 }
-
-.button-group button{
-
-    min-width:180px;
-
-    padding:15px 25px;
-
-    border:none;
 
-    border-radius:12px;
+.esp-status.online {
+  background: #c8e6c9;
 
-    font-size:17px;
-
-    font-weight:bold;
-
-    cursor:pointer;
-
-    transition:.3s;
-
-    color:white;
-
+  color: #1b5e20;
 }
-
-.button-group button i{
 
-    margin-right:8px;
+.esp-status.offline {
+  background: #ffcdd2;
 
+  color: #b71c1c;
 }
 
-.btn-start{
+/* =========================
+   WIFI
+========================= */
 
-    background:#27ae60;
-
+.wifi {
+  font-size: 28px;
 }
-
-.btn-start:hover{
-
-    background:#229954;
 
-    transform:translateY(-3px);
-
+.wifi-online {
+  color: #00e676;
 }
-
-.btn-stop{
-
-    background:#e74c3c;
 
+.wifi-offline {
+  color: #ff5252;
 }
 
-.btn-stop:hover{
+/* =========================
+   NOTIFICATION
+========================= */
 
-    background:#cb4335;
+.notif {
+  margin: 20px;
 
-    transform:translateY(-3px);
+  padding: 15px;
 
-}
-
-.btn-alarm{
-
-    background:#f39c12;
+  border-radius: 15px;
 
-}
+  text-align: center;
 
-.btn-alarm:hover{
+  background: white;
 
-    background:#d68910;
+  font-weight: bold;
 
-    transform:translateY(-3px);
-
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-
-/* ==========================================
-            POPUP
-========================================== */
-
-.popup{
-
-    position:fixed;
-
-    top:0;
-
-    left:0;
-
-    width:100%;
-
-    height:100%;
-
-    background:rgba(0,0,0,.6);
 
-    display:flex;
+.notif.aman {
+  background: #dcedc8;
 
-    justify-content:center;
-
-    align-items:center;
-
-    z-index:999;
-
+  color: #33691e;
 }
-
-.popup-content{
-
-    width:350px;
-
-    background:white;
 
-    border-radius:18px;
+.notif.warning {
+  background: #ffe0b2;
 
-    padding:35px;
-
-    text-align:center;
-
-    animation:popup .3s ease;
-
+  color: #e65100;
 }
 
-.popup-content h2{
+/* =========================
+   SENSOR CARD
+========================= */
 
-    color:#e74c3c;
+.card-grid {
+  display: grid;
 
-    margin-bottom:20px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 
-    font-size:32px;
+  gap: 20px;
 
+  padding: 20px;
 }
-
-.popup-content button{
-
-    padding:12px 28px;
-
-    border:none;
 
-    border-radius:10px;
+.card {
+  background: white;
 
-    background:#e74c3c;
+  border-radius: 20px;
 
-    color:white;
+  padding: 25px;
 
-    font-size:16px;
+  text-align: center;
 
-    cursor:pointer;
-
-}
-
-.popup-content button:hover{
-
-    background:#cb4335;
-
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
-
-.hidden{
 
-    display:none;
+.icon {
+  font-size: 40px;
 
+  color: #388e3c;
 }
-
-@keyframes popup{
-
-    from{
-
-        transform:scale(.8);
-
-        opacity:0;
-
-    }
-
-    to{
-
-        transform:scale(1);
 
-        opacity:1;
-
-    }
-
+.card h3 {
+  margin: 15px 0;
 }
-
-/* ==========================================
-            FOOTER
-========================================== */
-
-footer{
-
-    margin-top:40px;
-
-    padding:20px;
 
-    text-align:center;
+.card p {
+  font-size: 32px;
 
-    background:#0F4C81;
+  font-weight: bold;
 
-    color:white;
-
-    font-size:15px;
-
+  margin: 0;
 }
-
-/* ==========================================
-            SCROLLBAR
-========================================== */
 
-::-webkit-scrollbar{
-
-    width:10px;
-
-}
+/* =========================
+   STATUS SECTION
+========================= */
 
-::-webkit-scrollbar-thumb{
+.status-grid {
+  display: grid;
 
-    background:#0F4C81;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 
-    border-radius:20px;
+  gap: 20px;
 
+  padding: 20px;
 }
 
-::-webkit-scrollbar-track{
+.status-card h3 {
+  display: flex;
 
-    background:#ecf0f1;
+  justify-content: center;
 
+  gap: 10px;
 }
 
-/* ==========================================
-            RESPONSIVE
-========================================== */
+.status-text {
+  margin-top: 20px;
 
-@media(max-width:1000px){
+  padding: 20px;
 
-header{
+  border-radius: 15px;
 
-flex-direction:column;
+  font-size: 30px;
 
-gap:20px;
-
-text-align:center;
-
-}
-
-.logo{
-
-justify-content:center;
-
+  font-weight: bold;
 }
 
-.header-right{
+/* STATUS WARNA */
 
-justify-content:center;
+.status-heating {
+  background: #fff3cd;
 
-flex-wrap:wrap;
-
+  color: #856404;
 }
-
-.chart-card canvas{
-
-height:300px !important;
 
-}
+.status-optimal {
+  background: #c8e6c9;
 
+  color: #1b5e20;
 }
-
-@media(max-width:768px){
 
-.card-grid{
+.status-ready {
+  background: #bbdefb;
 
-grid-template-columns:1fr;
-
+  color: #0d47a1;
 }
-
-.status-grid{
 
-grid-template-columns:1fr;
+.status-warning {
+  background: #ffccbc;
 
+  color: #bf360c;
 }
 
-.button-group{
+.status-done {
+  background: #d1c4e9;
 
-flex-direction:column;
-
+  color: #4527a0;
 }
 
-.button-group button{
+/* =========================
+   GAS STATUS
+========================= */
 
-width:100%;
-
-}
+.gas-on {
+  margin-top: 20px;
 
-.chart-card{
+  font-size: 32px;
 
-padding:15px;
+  font-weight: bold;
 
+  color: #2e7d32;
 }
 
-.chart-card canvas{
-
-height:250px !important;
-
-}
+.gas-off {
+  margin-top: 20px;
 
-.logo h2{
+  font-size: 32px;
 
-font-size:22px;
+  font-weight: bold;
 
+  color: #c62828;
 }
 
-.card p{
+/* =========================
+   CHART
+========================= */
 
-font-size:28px;
+.chart-card {
+  background: white;
 
-}
+  margin: 20px;
 
-.status-text{
+  padding: 25px;
 
-font-size:24px;
+  border-radius: 20px;
 
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-#gasStatus{
+.chart-card h3 {
+  text-align: center;
 
-font-size:28px;
-
+  margin-bottom: 20px;
 }
 
+.chart-box {
+  height: 380px;
 }
-
-@media(max-width:480px){
 
-header{
-
-padding:15px;
-
+#sensorChart {
+  width: 100%;
 }
 
-.logo i{
+/* =========================
+   INFORMATION
+========================= */
 
-font-size:35px;
-
+.info-grid {
+  padding: 20px;
 }
-
-.clock-box{
 
-font-size:15px;
-
+.info-grid .card {
+  text-align: left;
 }
-
-.status{
-
-font-size:14px;
 
-padding:8px 14px;
+table {
+  width: 100%;
 
+  border-collapse: collapse;
 }
 
-.wifi{
+td {
+  padding: 12px;
 
-width:40px;
-
-height:40px;
-
+  border-bottom: 1px solid #ddd;
 }
-
-.card{
 
-padding:20px;
-
+td:first-child {
+  font-weight: bold;
 }
 
-.card i{
+/* =========================
+   FOOTER
+========================= */
 
-font-size:34px;
+footer {
+  margin-top: 30px;
 
-}
+  padding: 20px;
 
-.card h3{
+  text-align: center;
 
-font-size:16px;
+  background: #2e7d32;
 
+  color: white;
 }
-
-.card p{
 
-font-size:24px;
+/* =========================
+   RESPONSIVE MOBILE
+========================= */
 
-}
-
-.control-panel h2{
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
 
-font-size:22px;
+    gap: 20px;
 
-}
+    text-align: center;
+  }
 
-.popup-content{
+  .header-right {
+    flex-wrap: wrap;
 
-width:90%;
+    justify-content: center;
+  }
 
-}
+  .card p {
+    font-size: 28px;
+  }
 
+  .status-text {
+    font-size: 25px;
+  }
 }

@@ -1,15 +1,19 @@
 /* ==========================================================
    HERBADRY MONITORING SYSTEM
-   IoT-Based Herbal Drying Monitoring
+   IoT-Based Herbal Drying Monitoring Dashboard
+========================================================== */
+
+/* ==========================================================
+   FIREBASE IMPORT
 ========================================================== */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 
 import {
-    getDatabase,
-    ref,
-    onValue,
-    set
+  getDatabase,
+  ref,
+  onValue,
+  set,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 /* ==========================================================
@@ -17,24 +21,22 @@ import {
 ========================================================== */
 
 const firebaseConfig = {
+  apiKey: "AIzaSyAdXM0egIpInr5bt3bMsR3f6Nl09lGwzQs",
 
-    apiKey: "AIzaSyAdXM0egIpInr5bt3bMsR3f6Nl09lGwzQs",
+  authDomain: "herbadry-monitoring.firebaseapp.com",
 
-    authDomain: "herbadry-monitoring.firebaseapp.com",
+  databaseURL:
+    "https://herbadry-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
 
-    databaseURL:
-        "https://herbadry-monitoring-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "herbadry-monitoring",
 
-    projectId: "herbadry-monitoring",
+  storageBucket: "herbadry-monitoring.firebasestorage.app",
 
-    storageBucket: "herbadry-monitoring.firebasestorage.app",
+  messagingSenderId: "714369778562",
 
-    messagingSenderId: "714369778562",
+  appId: "1:714369778562:web:3ea942ef318bd5f7d4c59b",
 
-    appId: "1:714369778562:web:3ea942ef318bd5f7d4c59b",
-
-    measurementId: "G-BX2N20LC0W"
-
+  measurementId: "G-BX2N20LC0W",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -45,50 +47,46 @@ const db = getDatabase(app);
    HTML ELEMENT
 ========================================================== */
 
-// Header
+// HEADER
 
 const wifiIcon = document.getElementById("wifiIcon");
+
 const espStatus = document.getElementById("espStatus");
+
 const clock = document.getElementById("clock");
 
-// Sensor Card
+// SENSOR CARD
 
 const suhu = document.getElementById("suhu");
-const kelembapan = document.getElementById("kelembapan");
-const soil = document.getElementById("soil");
-const duration = document.getElementById("duration");
 
-// Status
+const kelembapan = document.getElementById("kelembapan");
+
+const moisture =
+document.getElementById("soil");
+
+// STATUS
 
 const status = document.getElementById("status");
+
 const gasStatus = document.getElementById("gasStatus");
 
-// Notification
+// NOTIFICATION
 
 const notif = document.getElementById("notif");
 
-// Information
+// INFORMATION
+
+const ipText = document.getElementById("ip");
 
 const lastUpdateText = document.getElementById("lastUpdate");
-const ipText = document.getElementById("ip");
+
 const alarmStatus = document.getElementById("alarmStatus");
-
-// Popup
-
-const popup = document.getElementById("popup");
-const popupText = document.getElementById("popupText");
 
 /* ==========================================================
    GLOBAL VARIABLE
 ========================================================== */
 
-let alarmOff = false;
-
-let popupShown = false;
-
-let lastUpdate = Date.now();
-
-// Chart Variable
+let lastFirebaseUpdate = Date.now();
 
 let sensorChart = null;
 
@@ -97,17 +95,17 @@ let sensorChart = null;
 ========================================================== */
 
 function updateClock() {
+  if (!clock) return;
 
-    const now = new Date();
+  let now = new Date();
 
-    const h = String(now.getHours()).padStart(2, "0");
+  let jam = String(now.getHours()).padStart(2, "0");
 
-    const m = String(now.getMinutes()).padStart(2, "0");
+  let menit = String(now.getMinutes()).padStart(2, "0");
 
-    const s = String(now.getSeconds()).padStart(2, "0");
+  let detik = String(now.getSeconds()).padStart(2, "0");
 
-    clock.innerHTML = `${h}:${m}:${s}`;
-
+  clock.innerHTML = `${jam}:${menit}:${detik}`;
 }
 
 updateClock();
@@ -115,508 +113,375 @@ updateClock();
 setInterval(updateClock, 1000);
 
 /* ==========================================================
-   ESP32 STATUS
+   ESP32 CONNECTION STATUS
 ========================================================== */
 
-onValue(ref(db, "sensor/ip"), (snapshot) => {
+onValue(
+  ref(db, "sensor/ip"),
 
+  (snapshot) => {
     if (snapshot.exists() && snapshot.val() !== "") {
+      // ONLINE
 
-        wifiIcon.classList.remove("offline");
-        wifiIcon.classList.add("online");
+      if (wifiIcon) {
+        wifiIcon.classList.remove("wifi-offline");
 
-        espStatus.classList.remove("offline");
-        espStatus.classList.add("online");
+        wifiIcon.classList.add("wifi-online");
+      }
 
+      if (espStatus) {
         espStatus.innerHTML = "ESP32 Online";
 
+        espStatus.className = "esp-status online";
+      }
+
+      if (ipText) {
         ipText.innerHTML = snapshot.val();
-
+      }
     } else {
+      // OFFLINE
 
-        wifiIcon.classList.remove("online");
-        wifiIcon.classList.add("offline");
+      if (wifiIcon) {
+        wifiIcon.classList.remove("wifi-online");
 
-        espStatus.classList.remove("online");
-        espStatus.classList.add("offline");
+        wifiIcon.classList.add("wifi-offline");
+      }
 
+      if (espStatus) {
         espStatus.innerHTML = "ESP32 Offline";
 
+        espStatus.className = "esp-status offline";
+      }
+
+      if (ipText) {
         ipText.innerHTML = "-";
-
+      }
     }
-
-});
+  },
+);
 
 /* ==========================================================
-   SENSOR DATA
+   SENSOR DATA FIREBASE
 ========================================================== */
 
-onValue(ref(db, "sensor"), (snapshot) => {
+onValue(
+  ref(db, "sensor"),
 
-    lastUpdate = Date.now();
-
+  (snapshot) => {
     if (!snapshot.exists()) return;
 
     const data = snapshot.val();
 
-    // ==========================
-    // Sensor Value
-    // ==========================
+    lastFirebaseUpdate = Date.now();
 
-    const temp = Number(data.suhu || 0);
-    const hum = Number(data.kelembapan || 0);
-    const moisture = Number(data.soil || 0);
-    const dryingTime = Number(data.duration || 0);
+    /*
+      DATA DARI ESP32:
 
-    updateChart(temp, hum, moisture);
+      sensor/
+          suhu
+          kelembapan
+          moisture
+          kondisi
+          valve
+          ip
 
-    suhu.innerHTML = temp.toFixed(1) + " °C";
-    kelembapan.innerHTML = hum.toFixed(1) + " %";
-    soil.innerHTML = moisture + " %";
+    */
 
-    const jam = Math.floor(dryingTime / 60);
-    const menit = dryingTime % 60;
+    let temp = Number(data.suhu || 0);
 
-    duration.innerHTML =
-        String(jam).padStart(2, "0") +
-        "h " +
-        String(menit).padStart(2, "0") +
-        "m";
+    let hum = Number(data.kelembapan || 0);
 
-    // ==========================
-    // Status Sistem
-    // ==========================
+    let moist = Number(data.moisture || 0);
 
-    const kondisi = data.kondisi || "Heating";
+    let valve = data.valve || "OFF";
 
-    status.innerHTML = kondisi;
+    let kondisi = data.kondisi || "STARTING";
 
-    status.className = "";
+    // UPDATE SENSOR CARD
 
-    switch (kondisi) {
-
-        case "Heating":
-
-            status.classList.add("status-heating");
-
-            notif.innerHTML =
-                "🔥 Oven sedang melakukan pemanasan.";
-
-            notif.className = "notif aman";
-
-            popup.classList.add("hidden");
-            popupShown = false;
-
-            break;
-
-        case "Ready Check":
-
-            status.classList.add("status-ready");
-
-            notif.innerHTML =
-                "🔍 Produk siap dilakukan pemeriksaan.";
-
-            notif.className = "notif aman";
-
-            popup.classList.add("hidden");
-            popupShown = false;
-
-            break;
-
-        case "Optimal":
-
-            status.classList.add("status-optimal");
-
-            notif.innerHTML =
-                "✅ Kondisi pengeringan optimal.";
-
-            notif.className = "notif aman";
-
-            popup.classList.add("hidden");
-            popupShown = false;
-
-            break;
-
-        case "Done":
-
-            status.classList.add("status-done");
-
-            notif.innerHTML =
-                "🎉 Proses pengeringan selesai.";
-
-            notif.className = "notif aman";
-
-            popup.classList.add("hidden");
-            popupShown = false;
-
-            break;
-
-        case "Warning":
-
-            status.classList.add("status-warning");
-
-            notif.innerHTML =
-                "⚠ Warning! Suhu atau kelembapan mulai keluar dari batas.";
-
-            notif.className = "notif warning";
-
-            if (!alarmOff && !popupShown) {
-
-                popup.classList.remove("hidden");
-
-                popupText.innerHTML = "WARNING";
-
-                popupShown = true;
-
-            }
-
-            break;
-
-        case "Danger":
-
-            status.classList.add("status-danger");
-
-            notif.innerHTML =
-                "🚨 Danger! Sistem mendeteksi kondisi berbahaya.";
-
-            notif.className = "notif bahaya";
-
-            if (!alarmOff && !popupShown) {
-
-                popup.classList.remove("hidden");
-
-                popupText.innerHTML = "DANGER";
-
-                popupShown = true;
-
-            }
-
-            break;
-
-        default:
-
-            status.classList.add("status-heating");
-
-            notif.innerHTML = "Menunggu data sensor...";
-
-            notif.className = "notif aman";
-
+    if (suhu) {
+      suhu.innerHTML = temp.toFixed(1) + " °C";
     }
 
-    // ==========================
-    // Gas Valve Status
-    // ==========================
-
-    if (gasStatus) {
-
-        if (data.gas === true || data.gas === "ON") {
-
-            gasStatus.innerHTML = "🟢 Gas ON";
-
-            gasStatus.className = "gas-on";
-
-        } else {
-
-            gasStatus.innerHTML = "🔴 Gas OFF";
-
-            gasStatus.className = "gas-off";
-
-        }
-
+    if (kelembapan) {
+      kelembapan.innerHTML = hum.toFixed(1) + " %";
     }
 
-    // ==========================
-    // Last Update
-    // ==========================
+    if (moisture) {
+      moisture.innerHTML = moist.toFixed(0) + " %";
+    }
+
+    // UPDATE WAKTU UPDATE
 
     if (lastUpdateText) {
+      let now = new Date();
 
-        const now = new Date();
-
-        lastUpdateText.innerHTML =
-            now.toLocaleDateString("id-ID") +
-            " " +
-            now.toLocaleTimeString("id-ID");
-
+      lastUpdateText.innerHTML =
+        "Last Update : " + now.toLocaleTimeString("id-ID");
     }
 
-});
+    updateChart(temp, hum, moist);
+    updateStatus(kondisi);
 
+    updateValve(valve);
+  },
+);
 /* ==========================================================
-   BUZZER STATUS
+   STATUS SYSTEM UPDATE
 ========================================================== */
 
-onValue(ref(db, "control/buzzerOff"), (snapshot) => {
+function updateStatus(kondisi) {
+  if (!status) return;
 
-    alarmOff = snapshot.val() === true;
+  // reset class
 
-    if (alarmStatus) {
+  status.className = "";
 
-        if (alarmOff) {
+  switch (kondisi) {
+    case "HEATING":
+      status.innerHTML = "🔥 HEATING";
 
-            alarmStatus.innerHTML = "🔕 Alarm OFF";
+      status.classList.add("status-heating");
 
-        } else {
+      if (notif) {
+        notif.innerHTML = "Oven sedang melakukan pemanasan";
 
-            alarmStatus.innerHTML = "🔔 Alarm ON";
+        notif.className = "notif aman";
+      }
 
-        }
+      break;
 
-    }
+    case "OPTIMAL":
+      status.innerHTML = "✅ OPTIMAL";
 
-});
+      status.classList.add("status-optimal");
+
+      if (notif) {
+        notif.innerHTML = "Kondisi pengeringan optimal";
+
+        notif.className = "notif aman";
+      }
+
+      break;
+
+    case "READY":
+      status.innerHTML = "✔ READY";
+
+      status.classList.add("status-ready");
+
+      if (notif) {
+        notif.innerHTML = "Bahan siap diperiksa";
+
+        notif.className = "notif aman";
+      }
+
+      break;
+
+    case "WARNING":
+      status.innerHTML = "⚠ WARNING";
+
+      status.classList.add("status-warning");
+
+      if (notif) {
+        notif.innerHTML = "Suhu atau kelembapan tidak aman";
+
+        notif.className = "notif warning";
+      }
+
+      break;
+
+    case "DONE":
+      status.innerHTML = "🎉 DONE";
+
+      status.classList.add("status-done");
+
+      if (notif) {
+        notif.innerHTML = "Proses pengeringan selesai";
+
+        notif.className = "notif aman";
+      }
+
+      break;
+
+    case "SENSOR ERROR":
+      status.innerHTML = "❌ SENSOR ERROR";
+
+      status.classList.add("status-warning");
+
+      if (notif) {
+        notif.innerHTML = "Sensor mengalami masalah";
+
+        notif.className = "notif warning";
+      }
+
+      break;
+
+    default:
+      status.innerHTML = kondisi;
+  }
+}
 
 /* ==========================================================
-   CHART.JS
+   VALVE STATUS
+========================================================== */
+
+function updateValve(valve) {
+  if (!gasStatus) return;
+
+  if (valve === "ON") {
+    gasStatus.innerHTML = "🟢 GAS ON";
+
+    gasStatus.className = "gas-on";
+  } else {
+    gasStatus.innerHTML = "🔴 GAS OFF";
+
+    gasStatus.className = "gas-off";
+  }
+}
+
+/* ==========================================================
+   CHART.JS REALTIME SENSOR
 ========================================================== */
 
 const chartCanvas = document.getElementById("sensorChart");
 
 if (chartCanvas) {
+  const ctx = chartCanvas.getContext("2d");
 
-    const ctx = chartCanvas.getContext("2d");
+  sensorChart = new Chart(ctx, {
+    type: "line",
 
-    sensorChart = new Chart(ctx, {
+    data: {
+      labels: [],
 
-        type: "line",
+      datasets: [
+        {
+          label: "Suhu °C",
 
-        data: {
+          data: [],
 
-            labels: [],
+          borderWidth: 2,
 
-            datasets: [
-
-                {
-                    label: "Suhu (°C)",
-                    data: [],
-                    borderWidth: 2,
-                    tension: 0.35,
-                    fill: false
-                },
-
-                {
-                    label: "Kelembapan (%)",
-                    data: [],
-                    borderWidth: 2,
-                    tension: 0.35,
-                    fill: false
-                },
-
-                {
-                    label: "Moisture (%)",
-                    data: [],
-                    borderWidth: 2,
-                    tension: 0.35,
-                    fill: false
-                }
-
-            ]
-
+          tension: 0.3,
         },
 
-        options: {
+        {
+          label: "Kelembapan %",
 
-            responsive: true,
+          data: [],
 
-            maintainAspectRatio: false,
+          borderWidth: 2,
 
-            interaction: {
-                mode: "index",
-                intersect: false
-            },
+          tension: 0.3,
+        },
 
-            plugins: {
+        {
+          label: "Moisture %",
 
-                legend: {
-                    display: true
-                }
+          data: [],
 
-            },
+          borderWidth: 2,
 
-            scales: {
+          tension: 0.3,
+        },
+      ],
+    },
 
-                x: {
+    options: {
+      responsive: true,
 
-                    title: {
+      maintainAspectRatio: false,
 
-                        display: true,
+      interaction: {
+        mode: "index",
 
-                        text: "Waktu"
+        intersect: false,
+      },
 
-                    }
+      plugins: {
+        legend: {
+          display: true,
+        },
+      },
 
-                },
+      scales: {
+        x: {
+          title: {
+            display: true,
 
-                y: {
+            text: "Waktu",
+          },
+        },
 
-                    beginAtZero: true,
+        y: {
+          beginAtZero: true,
 
-                    title: {
+          title: {
+            display: true,
 
-                        display: true,
+            text: "Nilai Sensor",
+          },
+        },
+      },
+    },
+  });
+}
 
-                        text: "Nilai Sensor"
+/* ==========================================================
+   UPDATE CHART FUNCTION
+========================================================== */
 
-                    }
+function updateChart(temp, hum, moist) {
+  if (!sensorChart) return;
 
-                }
+  let now = new Date();
 
-            }
+  let label =
+    now.getHours().toString().padStart(2, "0") +
+    ":" +
+    now.getMinutes().toString().padStart(2, "0") +
+    ":" +
+    now.getSeconds().toString().padStart(2, "0");
 
-        }
+  sensorChart.data.labels.push(label);
 
+  sensorChart.data.datasets[0].data.push(temp);
+
+  sensorChart.data.datasets[1].data.push(hum);
+
+  sensorChart.data.datasets[2].data.push(moist);
+
+  // simpan maksimal 30 data
+
+  const maxData = 30;
+
+  if (sensorChart.data.labels.length > maxData) {
+    sensorChart.data.labels.shift();
+
+    sensorChart.data.datasets.forEach((dataset) => {
+      dataset.data.shift();
     });
+  }
 
+  sensorChart.update();
 }
 
 /* ==========================================================
-   UPDATE CHART
-========================================================== */
-
-function updateChart(temp, hum, moisture) {
-
-    if (!sensorChart) return;
-
-    const now = new Date();
-
-    const label =
-        now.getHours().toString().padStart(2, "0") +
-        ":" +
-        now.getMinutes().toString().padStart(2, "0") +
-        ":" +
-        now.getSeconds().toString().padStart(2, "0");
-
-    sensorChart.data.labels.push(label);
-
-    sensorChart.data.datasets[0].data.push(temp);
-    sensorChart.data.datasets[1].data.push(hum);
-    sensorChart.data.datasets[2].data.push(moisture);
-
-    const maxPoint = 20;
-
-    if (sensorChart.data.labels.length > maxPoint) {
-
-        sensorChart.data.labels.shift();
-
-        sensorChart.data.datasets.forEach(dataset => {
-            dataset.data.shift();
-        });
-
-    }
-
-    sensorChart.update();
-
-}
-
-/* ==========================================================
-   CONTROL BUTTON
-========================================================== */
-
-// ===========================
-// START DRYING
-// ===========================
-
-window.mulaiPengeringan = function () {
-
-    set(ref(db, "control/startDrying"), true);
-
-    alert("Proses pengeringan dimulai.");
-
-};
-
-
-// ===========================
-// STOP DRYING
-// ===========================
-
-window.stopPengeringan = function () {
-
-    set(ref(db, "control/startDrying"), false);
-
-    alert("Proses pengeringan dihentikan.");
-
-};
-
-
-// ===========================
-// MATIKAN BUZZER
-// ===========================
-
-window.matikanBuzzer = function () {
-
-    set(ref(db, "control/buzzerOff"), true);
-
-    popup.classList.add("hidden");
-
-    popupShown = true;
-
-};
-
-
-// ===========================
-// GAS ON
-// ===========================
-
-window.gasOn = function () {
-
-    set(ref(db, "control/gas"), true);
-
-};
-
-
-// ===========================
-// GAS OFF
-// ===========================
-
-window.gasOff = function () {
-
-    set(ref(db, "control/gas"), false);
-
-};
-
-/* ==========================================================
-   GAS STATUS
-========================================================== */
-
-onValue(ref(db, "control/gas"), (snapshot) => {
-
-    if (!gasStatus) return;
-
-    const gas = snapshot.val();
-
-    if (gas === true) {
-
-        gasStatus.innerHTML = "🟢 Gas ON";
-
-        gasStatus.className = "gas-on";
-
-    } else {
-
-        gasStatus.innerHTML = "🔴 Gas OFF";
-
-        gasStatus.className = "gas-off";
-
-    }
-
-});
-
-/* ==========================================================
-   INTERNET CONNECTION
+   INTERNET CONNECTION CHECK
 ========================================================== */
 
 function checkInternet() {
+  if (!wifiIcon) return;
 
-    if (navigator.onLine) {
+  if (navigator.onLine) {
+    wifiIcon.classList.remove("wifi-offline");
 
-        wifiIcon.className = "wifi-icon wifi-online";
+    wifiIcon.classList.add("wifi-online");
+  } else {
+    wifiIcon.classList.remove("wifi-online");
 
-    } else {
-
-        wifiIcon.className = "wifi-icon wifi-offline";
-
-    }
-
+    wifiIcon.classList.add("wifi-offline");
+  }
 }
 
 checkInternet();
@@ -624,140 +489,72 @@ checkInternet();
 setInterval(checkInternet, 5000);
 
 /* ==========================================================
-   ESP32 OFFLINE CHECK
+   ESP32 OFFLINE DETECTOR
 ========================================================== */
 
 setInterval(() => {
+  let selisih = Date.now() - lastFirebaseUpdate;
 
-    const diff = Date.now() - lastUpdate;
+  // jika tidak menerima data
+  // lebih dari 15 detik
 
-    if (diff > 10000) {
+  if (selisih > 15000) {
+    if (espStatus) {
+      espStatus.innerHTML = "ESP32 Offline";
 
-        espStatus.innerHTML = "ESP32 Offline";
-
-        espStatus.className = "esp-status esp-offline";
-
+      espStatus.className = "esp-status offline";
     }
-
-}, 3000);
-
-/* ==========================================================
-   ESP32 IP ADDRESS
-========================================================== */
-
-onValue(ref(db, "sensor/ip"), (snapshot) => {
-
-    if (!ipAddress) return;
-
-    if (snapshot.exists()) {
-
-        ipAddress.innerHTML = snapshot.val();
-
-    } else {
-
-        ipAddress.innerHTML = "-";
-
-    }
-
-});
+  }
+}, 5000);
 
 /* ==========================================================
-   LAST UPDATE
-========================================================== */
-
-const lastUpdateText = document.getElementById("lastUpdate");
-
-function updateLastUpdate() {
-
-    if (!lastUpdateText) return;
-
-    const now = new Date();
-
-    lastUpdateText.innerHTML =
-        "Last Update : " +
-        now.toLocaleTimeString("id-ID");
-
-}
-
-/* ==========================================================
-   RESET POPUP SAAT STATUS NORMAL
-========================================================== */
-
-function resetPopup(statusSistem){
-
-    if(
-        statusSistem === "Heating" ||
-        statusSistem === "Optimal" ||
-        statusSistem === "Ready Check" ||
-        statusSistem === "Done"
-    ){
-
-        popupShown = false;
-
-        popup.classList.add("hidden");
-
-    }
-
-}
-
-/* ==========================================================
-   AUTO AKTIFKAN ALARM LAGI
-========================================================== */
-
-function resetAlarm(){
-
-    alarmOff = false;
-
-    set(ref(db,"control/buzzerOff"),false);
-
-}
-
-/* ==========================================================
-   ANIMASI CARD
+   CARD ANIMATION
 ========================================================== */
 
 const cards = document.querySelectorAll(".card");
 
-cards.forEach((card,index)=>{
+cards.forEach((card, index) => {
+  card.style.opacity = "0";
 
-    card.style.opacity="0";
+  card.style.transform = "translateY(20px)";
 
-    card.style.transform="translateY(20px)";
+  setTimeout(
+    () => {
+      card.style.transition = "0.5s";
 
-    setTimeout(()=>{
+      card.style.opacity = "1";
 
-        card.style.transition=".5s";
+      card.style.transform = "translateY(0)";
+    },
 
-        card.style.opacity="1";
-
-        card.style.transform="translateY(0px)";
-
-    },150*index);
-
+    index * 150,
+  );
 });
-
 
 /* ==========================================================
    DASHBOARD READY
 ========================================================== */
 
-window.addEventListener("load",()=>{
+window.addEventListener(
+  "load",
 
-    console.log("=====================================");
-    console.log(" HerbaDry Monitoring Dashboard Ready ");
+  () => {
+    console.log("=================================");
+
+    console.log(" HerbaDry Monitoring Dashboard ");
+
     console.log(" Firebase Connected ");
-    console.log(" ESP32 Waiting...");
-    console.log("=====================================");
 
-});
+    console.log(" Waiting ESP32 Data...");
 
+    console.log("=================================");
+  },
+);
 
 /* ==========================================================
-   PING DASHBOARD
+   KEEP ALIVE
 ========================================================== */
 
-setInterval(()=>{
-
-    console.log("Dashboard Active");
-
-},60000);
+setInterval(() => {
+  console.log("Dashboard Active");
+}, 60000);
