@@ -62,7 +62,7 @@ const suhu = document.getElementById("suhu");
 const kelembapan = document.getElementById("kelembapan");
 
 const moisture =
-document.getElementById("soil");
+document.getElementById("moisture");
 
 // STATUS
 
@@ -182,7 +182,7 @@ onValue(
           kelembapan
           moisture
           kondisi
-          valve
+          gas
           ip
 
     */
@@ -193,7 +193,7 @@ onValue(
 
     let moist = Number(data.moisture || 0);
 
-    let valve = data.valve || "OFF";
+    let gas = data.gas || "OFF";
 
     let kondisi = data.kondisi || "STARTING";
 
@@ -223,7 +223,7 @@ onValue(
     updateChart(temp, hum, moist);
     updateStatus(kondisi);
 
-    updateValve(valve);
+    updategas(gas);
   },
 );
 /* ==========================================================
@@ -238,6 +238,20 @@ function updateStatus(kondisi) {
   status.className = "";
 
   switch (kondisi) {
+    case "STANDBY":
+
+    status.innerHTML = "⏸ STANDBY";
+
+    status.classList.add("status-standby");
+
+    if (notif) {
+
+        notif.innerHTML = "Menunggu suhu oven mencapai 30°C";
+
+        notif.className = "notif aman";
+
+    }
+    break;
     case "HEATING":
       status.innerHTML = "🔥 HEATING";
 
@@ -290,19 +304,6 @@ function updateStatus(kondisi) {
 
       break;
 
-    case "DONE":
-      status.innerHTML = "🎉 DONE";
-
-      status.classList.add("status-done");
-
-      if (notif) {
-        notif.innerHTML = "Proses pengeringan selesai";
-
-        notif.className = "notif aman";
-      }
-
-      break;
-
     case "SENSOR ERROR":
       status.innerHTML = "❌ SENSOR ERROR";
 
@@ -322,13 +323,13 @@ function updateStatus(kondisi) {
 }
 
 /* ==========================================================
-   VALVE STATUS
+   GAS STATUS
 ========================================================== */
 
-function updateValve(valve) {
+function updateGas(gas) {
   if (!gasStatus) return;
 
-  if (valve === "ON") {
+  if (gas === "ON") {
     gasStatus.innerHTML = "🟢 GAS ON";
 
     gasStatus.className = "gas-on";
@@ -498,7 +499,7 @@ setInterval(() => {
   // jika tidak menerima data
   // lebih dari 15 detik
 
-  if (selisih > 15000) {
+  if (selisih > 30000) {
     if (espStatus) {
       espStatus.innerHTML = "ESP32 Offline";
 
