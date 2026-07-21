@@ -223,7 +223,7 @@ onValue(
     updateChart(temp, hum, moist);
     updateStatus(kondisi);
 
-    updategas(gas);
+    updateGas(gas);
   },
 );
 /* ==========================================================
