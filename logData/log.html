@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Log Data - HerbaDry Monitoring</title>
+
+    <link rel="stylesheet" href="log.css" />
+
+    <link rel="stylesheet" href="../style.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+
+  <body>
+    <!-- ==================================================
+         HEADER
+    ================================================== -->
+
+    <header>
+      <div class="logo">
+        <i class="fas fa-seedling"></i>
+
+        <div>
+          <h2>HerbaDry Monitoring</h2>
+
+          <span> IoT Herbal Drying System </span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <nav class="main-nav">
+          <a href="../index.html" class="nav-link">
+            <i class="fas fa-chart-line"></i>
+
+            Dashboard
+          </a>
+
+          <a href="log.html" class="nav-link active">
+            <i class="fas fa-table"></i>
+
+            Log Data
+          </a>
+        </nav>
+
+        <div class="clock-box">
+          <i class="far fa-clock"></i>
+
+          <span id="clock"> 00:00:00 </span>
+        </div>
+
+        <div id="firebaseStatus" class="esp-status online">
+          Firebase Connected
+        </div>
+      </div>
+    </header>
+
+    <!-- ==================================================
+         PAGE TITLE
+    ================================================== -->
+
+    <section class="page-title">
+      <h1>
+        <i class="fas fa-database"></i>
+
+        Log Data Monitoring
+      </h1>
+
+      <p>
+        Riwayat data suhu, kelembapan, kadar air, status pengeringan, dan
+        kondisi katup gas.
+      </p>
+    </section>
+
+    <!-- ==================================================
+         CONTROL PANEL
+    ================================================== -->
+
+    <section class="log-control-card">
+      <div class="log-control-item">
+        <label for="limitData"> Jumlah Data </label>
+
+        <select id="limitData">
+          <option value="25">25 Data</option>
+
+          <option value="50" selected>50 Data</option>
+
+          <option value="100">100 Data</option>
+
+          <option value="200">200 Data</option>
+        </select>
+      </div>
+
+      <div class="log-control-item">
+        <label for="filterStatus"> Filter Status </label>
+
+        <select id="filterStatus">
+          <option value="ALL">Semua Status</option>
+
+          <option value="STANDBY">STANDBY</option>
+
+          <option value="HEATING">HEATING</option>
+
+          <option value="READY">READY</option>
+
+          <option value="OPTIMAL">OPTIMAL</option>
+
+          <option value="WARNING">WARNING</option>
+
+          <option value="DANGER">DANGER</option>
+
+          <option value="DONE">DONE</option>
+
+          <option value="SENSOR ERROR">SENSOR ERROR</option>
+        </select>
+      </div>
+
+      <button id="refreshButton" class="refresh-button">
+        <i class="fas fa-sync-alt"></i>
+
+        Refresh Data
+      </button>
+    </section>
+
+    <!-- ==================================================
+         SUMMARY
+    ================================================== -->
+
+    <section class="log-summary-grid">
+      <div class="summary-card">
+        <i class="fas fa-list"></i>
+
+        <div>
+          <span> Total Data </span>
+
+          <strong id="totalData"> 0 </strong>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <i class="fas fa-temperature-high"></i>
+
+        <div>
+          <span> Suhu Terakhir </span>
+
+          <strong id="lastTemperature"> -- °C </strong>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <i class="fas fa-water"></i>
+
+        <div>
+          <span> Kelembapan Terakhir </span>
+
+          <strong id="lastHumidity"> -- % </strong>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <i class="fas fa-seedling"></i>
+
+        <div>
+          <span> Kadar Air Terakhir </span>
+
+          <strong id="lastMoisture"> -- % </strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================
+         GRAPH
+    ================================================== -->
+
+    <section class="chart-card log-chart-card">
+      <h3>
+        <i class="fas fa-chart-line"></i>
+
+        Grafik Riwayat Monitoring
+      </h3>
+
+      <div class="chart-box">
+        <canvas id="logChart"></canvas>
+      </div>
+    </section>
+
+    <!-- ==================================================
+         TABLE
+    ================================================== -->
+
+    <section class="log-table-card">
+      <div class="table-header">
+        <h3>
+          <i class="fas fa-table"></i>
+
+          Tabel Log Data
+        </h3>
+
+        <span id="dataInfo"> Menunggu data... </span>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+
+              <th>Waktu</th>
+
+              <th>Suhu</th>
+
+              <th>Kelembapan</th>
+
+              <th>Kadar Air</th>
+
+              <th>Status</th>
+
+              <th>Gas / Katup</th>
+
+              <th>Durasi</th>
+            </tr>
+          </thead>
+
+          <tbody id="logTableBody">
+            <tr>
+              <td colspan="8" class="empty-data">Belum ada data log.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================================================
+         FOOTER
+    ================================================== -->
+
+    <footer>IoT-Based Herbal Drying Monitoring System © 2026</footer>
+
+    <!-- ==================================================
+         JAVASCRIPT
+    ================================================== -->
+
+    <script type="module" src="log.js"></script>
+  </body>
+</html>

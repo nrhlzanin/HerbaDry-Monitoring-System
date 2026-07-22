@@ -1,4 +1,5 @@
 <!doctype html>
+
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
@@ -6,141 +7,265 @@
 
     <title>HerbaDry Monitoring</title>
 
+    <!-- CSS -->
     <link rel="stylesheet" href="style.css" />
 
+    <!-- Bootstrap Icons -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
 
+    <!-- Font Awesome -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
 
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
 
   <body>
+    <!-- =====================================================
+     HEADER
+====================================================== -->
+
     <header>
+      <!-- LOGO -->
       <div class="logo">
         <i class="fas fa-seedling"></i>
 
         <div>
           <h2>HerbaDry Monitoring</h2>
-
           <span>IoT Herbal Drying System</span>
         </div>
       </div>
 
+      <!-- HEADER RIGHT -->
       <div class="header-right">
-        <div class="clock-box">
-          <i class="far fa-clock"></i>
+        <!-- NAVIGATION -->
+        <nav class="main-nav">
+          <a href="index.html" class="nav-link active">
+            <i class="bi bi-speedometer2"></i>
+            Dashboard
+          </a>
 
-          <span id="clock"> 00:00:00 </span>
-        </div>
+          <a href="logData/log.html" class="nav-link">
+            <i class="bi bi-journal-text"></i>
+            Log Data
+          </a>
+        </nav>
 
-        <div id="espStatus" class="esp-status offline">ESP32 Offline</div>
-
+        <!-- WIFI STATUS -->
         <div id="wifiIcon" class="wifi wifi-offline">
           <i class="bi bi-wifi"></i>
+        </div>
+
+        <!-- ESP32 STATUS -->
+        <div id="espStatus" class="esp-status offline">ESP32 Offline</div>
+
+        <!-- CLOCK -->
+        <div class="clock-box">
+          <i class="bi bi-clock"></i>
+          <span id="clock">00:00:00</span>
         </div>
       </div>
     </header>
 
-    <div id="notif" class="notif">Menunggu Data Sensor...</div>
+    <!-- =====================================================
+     MAIN CONTENT
+====================================================== -->
 
-    <section class="card-grid">
-      <div class="card">
-        <i class="fas fa-temperature-high icon"></i>
+    <main>
+      <!-- ===================================================
+       SENSOR MONITORING
+  ==================================================== -->
 
-        <h3>Suhu</h3>
+      <section class="card-grid">
+        <!-- SUHU -->
+        <div class="card">
+          <div class="icon">
+            <i class="bi bi-thermometer-half"></i>
+          </div>
 
-        <p id="suhu">-- °C</p>
-      </div>
+          <h3>Suhu</h3>
 
-      <div class="card">
-        <i class="fas fa-water icon"></i>
+          <p id="suhu">-- °C</p>
+        </div>
 
-        <h3>Kelembapan</h3>
+        <!-- KELEMBAPAN -->
+        <div class="card">
+          <div class="icon">
+            <i class="bi bi-droplet-half"></i>
+          </div>
 
-        <p id="kelembapan">-- %</p>
-      </div>
+          <h3>Kelembapan Udara</h3>
 
-      <div class="card">
-        <i class="fas fa-seedling icon"></i>
+          <p id="kelembapan">-- %</p>
+        </div>
 
-        <h3>Kadar Air</h3>
+        <!-- KADAR AIR -->
+        <div class="card">
+          <div class="icon">
+            <i class="bi bi-moisture"></i>
+          </div>
 
-        <p id="moisture">-- %</p>
-      </div>
-    </section>
+          <h3>Kadar Air Bahan</h3>
 
-    <section class="status-grid">
-      <div class="card status-card">
+          <p id="moisture">-- %</p>
+        </div>
+
+        <!-- DURASI -->
+        <div class="card">
+          <div class="icon">
+            <i class="bi bi-stopwatch"></i>
+          </div>
+
+          <h3>Durasi Pengeringan</h3>
+
+          <p id="duration">00:00:00</p>
+        </div>
+      </section>
+
+      <!-- ===================================================
+       SYSTEM STATUS
+  ==================================================== -->
+
+      <section class="status-grid">
+        <!-- STATUS SISTEM -->
+        <div class="card status-card">
+          <h3>
+            <i class="bi bi-activity"></i>
+            Status Sistem
+          </h3>
+
+          <div id="status" class="status-text status-standby">⏸ STANDBY</div>
+
+          <div id="notif" class="notif aman">
+            Menunggu proses pengeringan dimulai
+          </div>
+        </div>
+
+        <!-- STATUS ALARM -->
+        <div class="card status-card">
+          <h3>
+            <i class="bi bi-shield-check"></i>
+            Status Alarm
+          </h3>
+
+          <div id="alarmStatus" class="status-text status-optimal">Normal</div>
+        </div>
+
+        <!-- STATUS GAS -->
+        <div class="card status-card">
+          <h3>
+            <i class="bi bi-fire"></i>
+            Status Gas
+          </h3>
+
+          <div id="gasStatus" class="gas-off">🔴 GAS OFF</div>
+        </div>
+      </section>
+
+      <!-- ===================================================
+       KONTROL PENGERINGAN
+  ==================================================== -->
+
+      <section class="card drying-control">
         <h3>
-          <i class="fas fa-heartbeat"></i>
-          Status Pengeringan
+          <i class="bi bi-sliders"></i>
+          Kontrol Pengeringan
         </h3>
 
-        <div id="status" class="status-text">WAITING</div>
-      </div>
+        <button id="dryingButton" class="drying-button start">
+          <i class="fas fa-play"></i>
 
-      <div class="card status-card">
+          Mulai Pengeringan
+        </button>
+
+        <p id="dryingControlStatus" class="drying-control-status">
+          Pengeringan belum dimulai
+        </p>
+      </section>
+
+      <!-- ===================================================
+       CHART
+  ==================================================== -->
+
+      <section class="chart-card">
         <h3>
-          <i class="fas fa-fire"></i>
-          Katup Gas
+          <i class="bi bi-graph-up"></i>
+          Monitoring Sensor Realtime
         </h3>
 
-        <div id="gasStatus" class="gas-off">🔴 GAS OFF</div>
-      </div>
-    </section>
+        <div class="chart-box">
+          <canvas id="sensorChart"></canvas>
+        </div>
+      </section>
 
-    <section class="chart-card">
-      <h3>
-        <i class="fas fa-chart-line"></i>
+      <!-- ===================================================
+       INFORMASI SISTEM
+  ==================================================== -->
 
-        Grafik Monitoring
-      </h3>
+      <section class="card info-section">
+        <div class="section-title">
+          <i class="bi bi-info-circle"></i>
 
-      <div class="chart-box">
-        <canvas id="sensorChart"></canvas>
-      </div>
-    </section>
+          <h2>Informasi Sistem</h2>
+        </div>
 
-    <section class="info-grid">
-      <div class="card">
-        <h3>Informasi Sistem</h3>
+        <div class="info-table-wrapper">
+          <table class="info-table">
+            <tbody>
+              <!-- IP ESP32 -->
+              <tr>
+                <th>
+                  <i class="bi bi-router"></i>
+                  IP Address ESP32
+                </th>
 
-        <table>
-          <tr>
-            <td>Update Terakhir</td>
+                <td id="ip">-</td>
+              </tr>
 
-            <td id="lastUpdate">-</td>
-          </tr>
+              <!-- LAST UPDATE -->
+              <tr>
+                <th>
+                  <i class="bi bi-clock-history"></i>
+                  Pembaruan Terakhir
+                </th>
 
-          <tr>
-            <td>Alamat IP</td>
+                <td id="lastUpdate">-</td>
+              </tr>
 
-            <td id="ip">-</td>
-          </tr>
+              <!-- FIREBASE -->
+              <tr>
+                <th>
+                  <i class="bi bi-cloud-check"></i>
+                  Firebase
+                </th>
 
-          <tr>
-            <td>Alarm</td>
+                <td id="firebaseStatus">Connecting</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
 
-            <td id="alarmStatus">🔔 ON</td>
-          </tr>
+    <!-- =====================================================
+     FOOTER
+====================================================== -->
 
-          <tr>
-            <td>Firebase</td>
+    <footer>
+      <p>HerbaDry Monitoring System</p>
 
-            <td>Connected</td>
-          </tr>
-        </table>
-      </div>
-    </section>
+      <p>IoT-Based Herbal Drying Monitoring</p>
+    </footer>
 
-    <footer>IoT-Based Herbal Drying Monitoring System © 2026</footer>
+    <!-- =====================================================
+     APP JS
+====================================================== -->
 
     <script type="module" src="app.js"></script>
   </body>

@@ -1,123 +1,181 @@
 /* ==========================================================
-   HERBADRY MONITORING SYSTEM
-   DASHBOARD CSS
+HERBADRY MONITORING SYSTEM
+DASHBOARD CSS - COMPACT VERSION
 ========================================================== */
 
-/* =========================
-   GLOBAL
-========================= */
+/* ==========================================================
+GLOBAL
+========================================================== */
 
 * {
   box-sizing: border-box;
   font-family: "Segoe UI", Arial, sans-serif;
 }
 
-body {
-  margin: 0;
-
-  background: #f4f7f6;
-
-  color: #333;
+html {
+  scroll-behavior: smooth;
 }
 
-/* =========================
-   HEADER
-========================= */
+body {
+  margin: 0;
+  background: #f4f7f6;
+  color: #333;
+  min-height: 100vh;
+}
+
+/* ==========================================================
+HEADER
+========================================================== */
 
 header {
   width: 100%;
-
   background: #2e7d32;
-
   color: white;
 
-  padding: 20px 40px;
+  padding: 14px 28px;
 
   display: flex;
-
   justify-content: space-between;
-
   align-items: center;
+  gap: 20px;
 }
+
+/* ==========================================================
+LOGO
+========================================================== */
 
 .logo {
   display: flex;
-
   align-items: center;
-
-  gap: 15px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .logo i {
-  font-size: 45px;
+  font-size: 34px;
 }
 
 .logo h2 {
   margin: 0;
-
-  font-size: 25px;
+  font-size: 21px;
+  line-height: 1.2;
 }
 
 .logo span {
-  font-size: 14px;
-
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
   opacity: 0.9;
 }
 
+/* ==========================================================
+HEADER RIGHT
+========================================================== */
+
 .header-right {
   display: flex;
-
   align-items: center;
-
-  gap: 15px;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
+
+/* ==========================================================
+NAVIGATION
+========================================================== */
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 11px;
+
+  border-radius: 8px;
+
+  color: white;
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  transition:
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+.nav-link:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* ==========================================================
+DIGITAL CLOCK
+========================================================== */
 
 .clock-box {
-  background: white;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
+  padding: 8px 11px;
+
+  border-radius: 9px;
+
+  background: white;
   color: #333;
 
-  padding: 10px 15px;
+  font-size: 13px;
+  font-weight: 600;
 
-  border-radius: 12px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 8px;
+  white-space: nowrap;
 }
 
-/* =========================
-   ESP STATUS
-========================= */
+/* ==========================================================
+ESP32 STATUS
+========================================================== */
 
 .esp-status {
-  padding: 10px 15px;
+  padding: 8px 11px;
 
-  border-radius: 20px;
+  border-radius: 16px;
 
+  font-size: 13px;
   font-weight: bold;
+
+  white-space: nowrap;
 }
 
 .esp-status.online {
   background: #c8e6c9;
-
   color: #1b5e20;
 }
 
 .esp-status.offline {
   background: #ffcdd2;
-
   color: #b71c1c;
 }
 
-/* =========================
-   WIFI
-========================= */
+/* ==========================================================
+WIFI STATUS
+========================================================== */
 
 .wifi {
-  font-size: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 23px;
 }
 
 .wifi-online {
@@ -128,270 +186,644 @@ header {
   color: #ff5252;
 }
 
-/* =========================
-   NOTIFICATION
-========================= */
-
-.notif {
-  margin: 20px;
-
-  padding: 15px;
-
-  border-radius: 15px;
-
-  text-align: center;
-
-  background: white;
-
-  font-weight: bold;
-
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.notif.aman {
-  background: #dcedc8;
-
-  color: #33691e;
-}
-
-.notif.warning {
-  background: #ffe0b2;
-
-  color: #e65100;
-}
-
-/* =========================
-   SENSOR CARD
-========================= */
+/* ==========================================================
+MAIN CARD GRID - SENSOR
+========================================================== */
 
 .card-grid {
   display: grid;
 
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
 
-  gap: 20px;
+  gap: 14px;
 
-  padding: 20px;
+  padding: 16px 20px;
 }
+
+/* ==========================================================
+GENERAL CARD
+========================================================== */
 
 .card {
   background: white;
 
-  border-radius: 20px;
+  border-radius: 14px;
 
-  padding: 25px;
+  padding: 16px;
 
   text-align: center;
 
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
-.icon {
-  font-size: 40px;
+.card:hover {
+  transform: translateY(-2px);
 
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================================
+SENSOR ICON
+========================================================== */
+
+.icon {
+  font-size: 30px;
   color: #388e3c;
 }
 
 .card h3 {
-  margin: 15px 0;
+  margin: 8px 0;
+
+  font-size: 16px;
 }
 
 .card p {
-  font-size: 32px;
+  margin: 0;
+
+  font-size: 25px;
 
   font-weight: bold;
-
-  margin: 0;
 }
 
-/* =========================
-   STATUS SECTION
-========================= */
+/* ==========================================================
+SYSTEM STATUS
+========================================================== */
 
 .status-grid {
   display: grid;
 
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 2fr 1fr 1fr;
 
-  gap: 20px;
+  gap: 14px;
 
-  padding: 20px;
+  padding: 0 20px 16px;
+}
+
+.status-card {
+  min-height: 150px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
 }
 
 .status-card h3 {
   display: flex;
 
   justify-content: center;
+  align-items: center;
 
-  gap: 10px;
+  gap: 7px;
+
+  margin: 0 0 10px;
+
+  font-size: 16px;
 }
+
+/* ==========================================================
+STATUS TEXT
+========================================================== */
 
 .status-text {
-  margin-top: 20px;
+  margin-top: 6px;
 
-  padding: 20px;
+  padding: 12px;
 
-  border-radius: 15px;
+  border-radius: 10px;
 
-  font-size: 30px;
+  font-size: 22px;
 
   font-weight: bold;
+
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
 }
 
-/* STATUS WARNA */
+/* ==========================================================
+STATUS COLORS
+========================================================== */
+
+.status-standby {
+  background: #eeeeee;
+  color: #424242;
+}
 
 .status-heating {
   background: #fff3cd;
-
   color: #856404;
 }
 
 .status-optimal {
   background: #c8e6c9;
-
   color: #1b5e20;
 }
 
 .status-ready {
   background: #bbdefb;
-
   color: #0d47a1;
 }
 
 .status-warning {
   background: #ffccbc;
-
   color: #bf360c;
 }
 
-.status-done {
-  background: #d1c4e9;
+/* ==========================================================
+NOTIFICATION
+========================================================== */
 
-  color: #4527a0;
+.notif {
+  margin: 10px 0 0;
+
+  padding: 9px;
+
+  border-radius: 9px;
+
+  text-align: center;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  box-shadow: none;
 }
 
-/* =========================
-   GAS STATUS
-========================= */
+.notif.aman {
+  background: #dcedc8;
+  color: #33691e;
+}
 
-.gas-on {
-  margin-top: 20px;
+.notif.warning {
+  background: #ffe0b2;
+  color: #e65100;
+}
 
-  font-size: 32px;
+/* ==========================================================
+GAS STATUS
+========================================================== */
+
+.gas-on,
+.gas-off {
+  margin-top: 12px;
+
+  font-size: 23px;
 
   font-weight: bold;
+}
 
+.gas-on {
   color: #2e7d32;
 }
 
 .gas-off {
-  margin-top: 20px;
-
-  font-size: 32px;
-
-  font-weight: bold;
-
   color: #c62828;
 }
 
-/* =========================
-   CHART
-========================= */
+/* ==========================================================
+   DRYING CONTROL - HIGHLIGHTED
+========================================================== */
 
-.chart-card {
+.drying-control {
+  margin: 0 20px 16px;
+
+  padding: 18px 20px;
+
+  border: 2px solid #81c784;
+
+  border-left: 6px solid #2e7d32;
+
+  background: #f1f8f2;
+
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.15);
+}
+
+/* JUDUL KONTROL */
+
+.drying-control h3 {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 8px;
+
+  margin: 0 0 14px;
+
+  color: #1b5e20;
+
+  font-size: 18px;
+}
+
+/* IKON JUDUL */
+
+.drying-control h3 i {
+  font-size: 19px;
+}
+
+/* TOMBOL */
+
+.drying-button {
+  width: 100%;
+
+  margin-top: 0;
+
+  padding: 13px 16px;
+
+  border: none;
+
+  border-radius: 9px;
+
+  font-size: 15px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease,
+    box-shadow 0.25s ease;
+}
+
+/* HOVER */
+
+.drying-button:hover {
+  transform: translateY(-1px);
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* ACTIVE */
+
+.drying-button:active {
+  transform: scale(0.98);
+}
+
+/* TOMBOL MULAI */
+
+.drying-button.start {
+  background: #2e7d32;
+
+  color: white;
+}
+
+/* HOVER TOMBOL MULAI */
+
+.drying-button.start:hover {
+  background: #1b5e20;
+}
+
+/* TOMBOL BERHENTI */
+
+.drying-button.stop {
+  background: #c62828;
+
+  color: white;
+}
+
+/* HOVER TOMBOL BERHENTI */
+
+.drying-button.stop:hover {
+  background: #b71c1c;
+}
+
+/* STATUS KONTROL */
+
+.drying-control-status {
+  margin: 10px 0 0;
+
+  padding: 7px;
+
+  border-radius: 6px;
+
   background: white;
 
-  margin: 20px;
+  font-size: 13px;
 
-  padding: 25px;
+  font-weight: 600;
 
-  border-radius: 20px;
+  color: #555;
 
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* ==========================================================
+CHART
+========================================================== */
+
+.chart-card {
+  margin: 0 20px 16px;
+
+  padding: 16px;
+
+  border-radius: 14px;
+
+  background: white;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
 .chart-card h3 {
+  margin: 0 0 12px;
+
   text-align: center;
 
-  margin-bottom: 20px;
+  font-size: 17px;
 }
 
 .chart-box {
-  height: 380px;
+  position: relative;
+
+  width: 100%;
+
+  height: 300px;
 }
 
 #sensorChart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ==========================================================
+INFORMASI SISTEM
+========================================================== */
+
+.info-section {
+  margin: 0 20px 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 10px;
+}
+
+.section-title i {
+  color: #2e7d32;
+  font-size: 18px;
+}
+
+.section-title h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.info-table-wrapper {
   width: 100%;
+  overflow-x: auto;
 }
 
-/* =========================
-   INFORMATION
-========================= */
-
-.info-grid {
-  padding: 20px;
-}
-
-.info-grid .card {
-  text-align: left;
-}
-
-table {
+.info-table {
   width: 100%;
 
   border-collapse: collapse;
+
+  font-size: 13px;
 }
 
-td {
-  padding: 12px;
-
-  border-bottom: 1px solid #ddd;
+.info-table tr {
+  border-bottom: 1px solid #eeeeee;
 }
 
-td:first-child {
-  font-weight: bold;
+.info-table tr:last-child {
+  border-bottom: none;
 }
 
-/* =========================
-   FOOTER
-========================= */
+.info-table th,
+.info-table td {
+  padding: 9px 10px;
+
+  text-align: left;
+}
+
+.info-table th {
+  width: 35%;
+
+  color: #555;
+
+  font-weight: 600;
+}
+
+.info-table th i {
+  margin-right: 6px;
+
+  color: #2e7d32;
+}
+
+.info-table td {
+  color: #333;
+
+  font-weight: 600;
+}
+
+#firebaseStatus {
+  color: #2e7d32;
+}
+
+/* ==========================================================
+FOOTER
+========================================================== */
 
 footer {
-  margin-top: 30px;
+  margin-top: 20px;
 
-  padding: 20px;
+  padding: 14px;
 
   text-align: center;
 
   background: #2e7d32;
 
   color: white;
+
+  font-size: 12px;
 }
 
-/* =========================
-   RESPONSIVE MOBILE
-========================= */
+footer p {
+  margin: 3px 0;
+}
 
-@media (max-width: 768px) {
+/* ==========================================================
+TABLET
+========================================================== */
+
+@media (max-width: 1100px) {
   header {
     flex-direction: column;
-
-    gap: 20px;
-
+    align-items: center;
     text-align: center;
   }
 
   .header-right {
-    flex-wrap: wrap;
-
     justify-content: center;
   }
 
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ==========================================================
+MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+  header {
+    padding: 16px;
+    gap: 15px;
+  }
+
+  .logo {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .logo i {
+    font-size: 32px;
+  }
+
+  .logo h2 {
+    font-size: 20px;
+  }
+
+  .logo span {
+    font-size: 12px;
+  }
+
+  .header-right {
+    width: 100%;
+
+    flex-direction: column;
+
+    gap: 9px;
+  }
+
+  .main-nav {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .nav-link {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .clock-box,
+  .esp-status {
+    width: 100%;
+
+    justify-content: center;
+
+    text-align: center;
+  }
+
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+
+    padding: 12px;
+
+    gap: 10px;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+
+    padding: 0 12px 12px;
+
+    gap: 10px;
+  }
+
+  .status-card {
+    min-height: auto;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
   .card p {
-    font-size: 28px;
+    font-size: 22px;
+  }
+
+  .icon {
+    font-size: 27px;
+  }
+
+  .card h3 {
+    font-size: 14px;
   }
 
   .status-text {
-    font-size: 25px;
+    font-size: 20px;
+  }
+
+  .drying-control {
+    margin: 0 12px 12px;
+  }
+
+  .chart-card {
+    margin: 0 12px 12px;
+  }
+
+  .chart-box {
+    height: 260px;
+  }
+
+  .info-section {
+    margin: 0 12px 12px;
+  }
+
+  .info-table {
+    font-size: 12px;
+  }
+
+  .info-table th,
+  .info-table td {
+    padding: 8px;
+  }
+}
+
+/* ==========================================================
+VERY SMALL SCREEN
+========================================================== */
+
+@media (max-width: 420px) {
+  .main-nav {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-link {
+    width: 100%;
+    flex: none;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .card p {
+    font-size: 20px;
+  }
+
+  .status-text {
+    font-size: 18px;
+  }
+
+  .gas-on,
+  .gas-off {
+    font-size: 20px;
+  }
+
+  .chart-box {
+    height: 230px;
   }
 }

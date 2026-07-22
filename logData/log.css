@@ -1,0 +1,436 @@
+/* ==========================================================
+   LOG DATA PAGE
+========================================================== */
+
+.page-title {
+  padding: 30px 20px 10px;
+
+  text-align: center;
+}
+
+.page-title h1 {
+  margin: 0;
+
+  color: #2e7d32;
+}
+
+.page-title p {
+  margin-top: 10px;
+
+  color: #666;
+}
+
+/* =========================
+   LOG CONTROL
+========================= */
+
+.log-control-card {
+  margin: 20px;
+
+  padding: 20px;
+
+  background: white;
+
+  border-radius: 20px;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+
+  align-items: end;
+
+  gap: 20px;
+
+  flex-wrap: wrap;
+}
+
+.log-control-item {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.log-control-item label {
+  font-weight: bold;
+}
+
+.log-control-item select {
+  padding: 10px 15px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 8px;
+
+  background: white;
+
+  font-size: 14px;
+}
+
+.refresh-button {
+  padding: 11px 18px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #2e7d32;
+
+  color: white;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.25s;
+}
+
+.refresh-button:hover {
+  background: #1b5e20;
+
+  transform: translateY(-2px);
+}
+
+/* =========================
+   SUMMARY
+========================= */
+
+.log-summary-grid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+  gap: 20px;
+
+  padding: 0 20px 20px;
+}
+
+.summary-card {
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 20px;
+
+  background: white;
+
+  border-radius: 15px;
+
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.summary-card > i {
+  font-size: 30px;
+
+  color: #388e3c;
+}
+
+.summary-card span {
+  display: block;
+
+  font-size: 13px;
+
+  color: #777;
+}
+
+.summary-card strong {
+  display: block;
+
+  margin-top: 5px;
+
+  font-size: 24px;
+
+  color: #333;
+}
+
+/* =========================
+   LOG CHART
+========================= */
+
+.log-chart-card {
+  margin-top: 0;
+}
+
+/* ==========================================================
+   TABLE LOG DATA - COMPACT
+========================================================== */
+
+.log-table-card {
+  margin: 0 20px 16px;
+
+  padding: 16px 18px;
+
+  background: white;
+
+  border-radius: 14px;
+
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* HEADER TABEL */
+
+.table-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 12px;
+
+  margin-bottom: 12px;
+}
+
+/* JUDUL */
+
+.table-header h3 {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin: 0;
+
+  color: #333;
+
+  font-size: 17px;
+}
+
+.table-header h3 i {
+  color: #2e7d32;
+
+  font-size: 17px;
+}
+
+/* INFORMASI DATA */
+
+.table-header span {
+  color: #777;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+}
+
+/* PEMBUNGKUS TABEL */
+
+.table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+/* TABEL */
+
+.log-table-card table {
+  width: 100%;
+
+  min-width: 900px;
+
+  border-collapse: collapse;
+
+  font-size: 13px;
+}
+
+/* HEADER KOLOM */
+
+.log-table-card th {
+  padding: 10px 12px;
+
+  background: #2e7d32;
+
+  color: white;
+
+  text-align: center;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+/* DATA TABEL */
+
+.log-table-card td {
+  padding: 9px 12px;
+
+  text-align: center;
+
+  white-space: nowrap;
+
+  border-bottom: 1px solid #eeeeee;
+
+  color: #444;
+}
+
+/* BARIS HOVER */
+
+.log-table-card tbody tr:hover {
+  background: #f1f8f2;
+}
+
+/* DATA KOSONG */
+
+.empty-data {
+  padding: 25px !important;
+
+  text-align: center !important;
+
+  color: #777;
+
+  font-size: 13px;
+}
+
+/* =========================
+   LOG STATUS
+========================= */
+
+.log-status {
+  display: inline-block;
+
+  padding: 6px 10px;
+
+  border-radius: 8px;
+
+  font-size: 12px;
+
+  font-weight: bold;
+}
+
+.log-status-standby {
+  background: #eeeeee;
+
+  color: #424242;
+}
+
+.log-status-heating {
+  background: #fff3cd;
+
+  color: #856404;
+}
+
+.log-status-ready {
+  background: #bbdefb;
+
+  color: #0d47a1;
+}
+
+.log-status-optimal {
+  background: #c8e6c9;
+
+  color: #1b5e20;
+}
+
+.log-status-warning {
+  background: #ffccbc;
+
+  color: #bf360c;
+}
+
+/* =========================
+   LOG GAS
+========================= */
+
+.log-gas-on {
+  color: #2e7d32;
+
+  font-weight: bold;
+}
+
+.log-gas-off {
+  color: #c62828;
+
+  font-weight: bold;
+}
+
+/* =========================
+   MOBILE LOG
+========================= */
+
+@media (max-width: 768px) {
+  .page-title h1 {
+    font-size: 24px;
+  }
+
+  .page-title p {
+    font-size: 14px;
+  }
+
+  .log-control-card {
+    margin: 15px;
+
+    align-items: stretch;
+
+    flex-direction: column;
+  }
+
+  .log-control-item select,
+  .refresh-button {
+    width: 100%;
+  }
+
+  .log-summary-grid {
+    padding: 0 15px 15px;
+  }
+
+  .log-table-card {
+    margin: 15px;
+
+    padding: 15px;
+  }
+
+  .table-header {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+}
+
+/* ==========================================================
+   RESPONSIVE TABLE
+========================================================== */
+
+@media (max-width: 768px) {
+  .log-table-card {
+    margin: 0 12px 12px;
+
+    padding: 14px;
+  }
+
+  .table-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 5px;
+  }
+
+  .table-header h3 {
+    font-size: 16px;
+  }
+
+  .table-header span {
+    font-size: 11px;
+  }
+
+  .log-table-card table {
+    min-width: 850px;
+
+    font-size: 12px;
+  }
+
+  .log-table-card th {
+    padding: 8px 10px;
+
+    font-size: 11px;
+  }
+
+  .log-table-card td {
+    padding: 8px 10px;
+  }
+}

@@ -17,11 +17,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 /* ==========================================================
-   FIREBASE CONFIG
+   FIREBASE CONFIGURATION
 ========================================================== */
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAdXM0egIpInr5bt3bMsR3f6Nl09lGwzQs",
+  apiKey: "AIzaSyAdXM0egInR5bt3bMsR3f6Nl09lGwzQs",
 
   authDomain: "herbadry-monitoring.firebaseapp.com",
 
@@ -47,34 +47,31 @@ const db = getDatabase(app);
    HTML ELEMENT
 ========================================================== */
 
-// HEADER
-
 const wifiIcon = document.getElementById("wifiIcon");
 
 const espStatus = document.getElementById("espStatus");
 
 const clock = document.getElementById("clock");
 
-// SENSOR CARD
-
 const suhu = document.getElementById("suhu");
 
 const kelembapan = document.getElementById("kelembapan");
 
-const moisture =
-document.getElementById("moisture");
-
-// STATUS
+const moisture = document.getElementById("moisture");
 
 const status = document.getElementById("status");
 
 const gasStatus = document.getElementById("gasStatus");
 
-// NOTIFICATION
+const valveStatus = document.getElementById("valveStatus");
+
+const duration = document.getElementById("duration");
+
+const dryingButton = document.getElementById("dryingButton");
+
+const dryingControlStatus = document.getElementById("dryingControlStatus");
 
 const notif = document.getElementById("notif");
-
-// INFORMATION
 
 const ipText = document.getElementById("ip");
 
@@ -82,30 +79,44 @@ const lastUpdateText = document.getElementById("lastUpdate");
 
 const alarmStatus = document.getElementById("alarmStatus");
 
+const firebaseStatus = document.getElementById("firebaseStatus");
+
 /* ==========================================================
    GLOBAL VARIABLE
 ========================================================== */
 
-let lastFirebaseUpdate = Date.now();
+let lastFirebaseUpdate = 0;
 
 let sensorChart = null;
+
+let dryingStarted = false;
+
+let dryingFinished = false;
+
+let dryingStartTime = 0;
+
+let dryingStopTime = 0;
+
+let durationTimer = null;
 
 /* ==========================================================
    DIGITAL CLOCK
 ========================================================== */
 
 function updateClock() {
-  if (!clock) return;
+  if (!clock) {
+    return;
+  }
 
-  let now = new Date();
+  const now = new Date();
 
-  let jam = String(now.getHours()).padStart(2, "0");
+  const jam = String(now.getHours()).padStart(2, "0");
 
-  let menit = String(now.getMinutes()).padStart(2, "0");
+  const menit = String(now.getMinutes()).padStart(2, "0");
 
-  let detik = String(now.getSeconds()).padStart(2, "0");
+  const detik = String(now.getSeconds()).padStart(2, "0");
 
-  clock.innerHTML = `${jam}:${menit}:${detik}`;
+  clock.textContent = `${jam}:${menit}:${detik}`;
 }
 
 updateClock();
@@ -113,152 +124,400 @@ updateClock();
 setInterval(updateClock, 1000);
 
 /* ==========================================================
-   ESP32 CONNECTION STATUS
+   HELPER
 ========================================================== */
 
-onValue(
-  ref(db, "sensor/ip"),
+function toNumber(value) {
+  const number = Number(value);
 
-  (snapshot) => {
-    if (snapshot.exists() && snapshot.val() !== "") {
-      // ONLINE
+  return Number.isFinite(number) ? number : null;
+}
 
-      if (wifiIcon) {
-        wifiIcon.classList.remove("wifi-offline");
+/* ==========================================================
+   FORMAT DURASI
+========================================================== */
 
-        wifiIcon.classList.add("wifi-online");
-      }
+function formatDuration(value) {
+  if (value === null || value === undefined || value === "") {
+    return "00:00:00";
+  }
 
-      if (espStatus) {
-        espStatus.innerHTML = "ESP32 Online";
+  if (typeof value === "string" && value.includes(":")) {
+    return value;
+  }
 
-        espStatus.className = "esp-status online";
-      }
+  const totalSeconds = Math.max(0, Math.floor(Number(value)));
 
-      if (ipText) {
-        ipText.innerHTML = snapshot.val();
+  if (!Number.isFinite(totalSeconds)) {
+    return "00:00:00";
+  }
+
+  const hours = Math.floor(totalSeconds / 3600);
+
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+  const seconds = totalSeconds % 60;
+
+  return [
+    String(hours).padStart(2, "0"),
+
+    String(minutes).padStart(2, "0"),
+
+    String(seconds).padStart(2, "0"),
+  ].join(":");
+}
+
+/* ==========================================================
+   UPDATE TIMER
+========================================================== */
+
+function updateDurationDisplay() {
+  if (!duration) {
+    return;
+  }
+
+  if (dryingStartTime <= 0) {
+    duration.textContent = "00:00:00";
+
+    return;
+  }
+
+  let endTime = Date.now();
+
+  if (dryingFinished && dryingStopTime > 0) {
+    endTime = dryingStopTime;
+  }
+
+  const elapsedSeconds = Math.max(
+    0,
+    Math.floor((endTime - dryingStartTime) / 1000),
+  );
+
+  duration.textContent = formatDuration(elapsedSeconds);
+}
+
+/* ==========================================================
+   TIMER
+========================================================== */
+
+function startDurationTimer() {
+  if (durationTimer) {
+    clearInterval(durationTimer);
+  }
+
+  updateDurationDisplay();
+
+  durationTimer = setInterval(() => {
+    if (dryingStarted && !dryingFinished) {
+      updateDurationDisplay();
+    }
+  }, 1000);
+}
+
+function stopDurationTimer() {
+  if (durationTimer) {
+    clearInterval(durationTimer);
+
+    durationTimer = null;
+  }
+
+  updateDurationDisplay();
+}
+
+/* ==========================================================
+   FORMAT WAKTU
+========================================================== */
+
+function getCurrentTime() {
+  return new Date().toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+
+    minute: "2-digit",
+
+    second: "2-digit",
+  });
+}
+
+/* ==========================================================
+   ESP32 STATUS
+========================================================== */
+
+function setEspStatus(isOnline) {
+  if (espStatus) {
+    if (isOnline) {
+      espStatus.textContent = "ESP32 Online";
+
+      espStatus.className = "esp-status online";
+    } else {
+      espStatus.textContent = "ESP32 Offline";
+
+      espStatus.className = "esp-status offline";
+    }
+  }
+
+  if (wifiIcon) {
+    if (isOnline) {
+      wifiIcon.classList.remove("wifi-offline");
+
+      wifiIcon.classList.add("wifi-online");
+    } else {
+      wifiIcon.classList.remove("wifi-online");
+
+      wifiIcon.classList.add("wifi-offline");
+    }
+  }
+}
+
+/* ==========================================================
+   FIREBASE SENSOR
+========================================================== */
+
+onValue(ref(db, "sensor"), (snapshot) => {
+  if (!snapshot.exists()) {
+    setEspStatus(false);
+
+    if (firebaseStatus) {
+      firebaseStatus.textContent = "No Data";
+    }
+
+    if (ipText) {
+      ipText.textContent = "-";
+    }
+
+    return;
+  }
+
+  const data = snapshot.val();
+
+  lastFirebaseUpdate = Date.now();
+
+  setEspStatus(true);
+
+  if (ipText) {
+    ipText.textContent = data.ip || "-";
+  }
+
+  /* SENSOR */
+
+  const temp = toNumber(data.suhu);
+
+  const hum = toNumber(data.kelembapan);
+
+  const moist = toNumber(data.moisture ?? data.soil);
+
+  /* STATUS */
+
+  const gas = String(data.gas || "OFF")
+    .trim()
+    .toUpperCase();
+
+  const kondisi = String(data.kondisi || "STANDBY")
+    .trim()
+    .toUpperCase();
+
+  /* SUHU */
+
+  if (suhu && temp !== null) {
+    suhu.textContent = `${temp.toFixed(1)} °C`;
+  }
+
+  /* KELEMBAPAN */
+
+  if (kelembapan && hum !== null) {
+    kelembapan.textContent = `${hum.toFixed(1)} %`;
+  }
+
+  /* MOISTURE */
+
+  if (moisture && moist !== null) {
+    moisture.textContent = `${moist.toFixed(0)} %`;
+  }
+
+  /* DURASI DARI ESP32 */
+
+  if (data.duration !== undefined) {
+    /*
+         Jika proses selesai,
+         gunakan durasi final ESP32.
+      */
+
+    if (dryingFinished) {
+      duration.textContent = formatDuration(data.duration);
+    }
+  }
+
+  if (lastUpdateText) {
+    lastUpdateText.textContent = getCurrentTime();
+  }
+
+  if (firebaseStatus) {
+    firebaseStatus.textContent = "Connected";
+  }
+
+  updateStatus(kondisi);
+
+  updateGas(gas);
+
+  if (temp !== null && hum !== null && moist !== null) {
+    updateChart(temp, hum, moist);
+  }
+});
+
+/* ==========================================================
+   CONTROL START / STOP
+========================================================== */
+
+onValue(ref(db, "control/startDrying"), (snapshot) => {
+  const value = snapshot.val();
+
+  dryingStarted = value === true || value === "true" || value === 1;
+
+  if (dryingStarted) {
+    dryingFinished = false;
+
+    updateDryingButton();
+
+    startDurationTimer();
+
+    if (dryingControlStatus) {
+      dryingControlStatus.textContent = "Pengeringan sedang berlangsung";
+    }
+  } else {
+    updateDryingButton();
+
+    if (dryingFinished) {
+      stopDurationTimer();
+
+      if (dryingControlStatus) {
+        dryingControlStatus.textContent = "Proses pengeringan selesai";
       }
     } else {
-      // OFFLINE
+      stopDurationTimer();
 
-      if (wifiIcon) {
-        wifiIcon.classList.remove("wifi-online");
-
-        wifiIcon.classList.add("wifi-offline");
-      }
-
-      if (espStatus) {
-        espStatus.innerHTML = "ESP32 Offline";
-
-        espStatus.className = "esp-status offline";
-      }
-
-      if (ipText) {
-        ipText.innerHTML = "-";
+      if (dryingControlStatus) {
+        dryingControlStatus.textContent = "Pengeringan belum dimulai";
       }
     }
-  },
-);
+  }
+});
 
 /* ==========================================================
-   SENSOR DATA FIREBASE
+   START TIME
 ========================================================== */
 
-onValue(
-  ref(db, "sensor"),
+onValue(ref(db, "control/startTime"), (snapshot) => {
+  const value = toNumber(snapshot.val());
 
-  (snapshot) => {
-    if (!snapshot.exists()) return;
+  if (value !== null && value > 0) {
+    dryingStartTime = value;
 
-    const data = snapshot.val();
+    dryingFinished = false;
 
-    lastFirebaseUpdate = Date.now();
+    updateDurationDisplay();
 
-    /*
-      DATA DARI ESP32:
-
-      sensor/
-          suhu
-          kelembapan
-          moisture
-          kondisi
-          gas
-          ip
-
-    */
-
-    let temp = Number(data.suhu || 0);
-
-    let hum = Number(data.kelembapan || 0);
-
-    let moist = Number(data.moisture || 0);
-
-    let gas = data.gas || "OFF";
-
-    let kondisi = data.kondisi || "STARTING";
-
-    // UPDATE SENSOR CARD
-
-    if (suhu) {
-      suhu.innerHTML = temp.toFixed(1) + " °C";
+    if (dryingStarted) {
+      startDurationTimer();
     }
+  }
+});
 
-    if (kelembapan) {
-      kelembapan.innerHTML = hum.toFixed(1) + " %";
-    }
-
-    if (moisture) {
-      moisture.innerHTML = moist.toFixed(0) + " %";
-    }
-
-    // UPDATE WAKTU UPDATE
-
-    if (lastUpdateText) {
-      let now = new Date();
-
-      lastUpdateText.innerHTML =
-        "Last Update : " + now.toLocaleTimeString("id-ID");
-    }
-
-    updateChart(temp, hum, moist);
-    updateStatus(kondisi);
-
-    updateGas(gas);
-  },
-);
 /* ==========================================================
-   STATUS SYSTEM UPDATE
+   TOMBOL START / STOP
+========================================================== */
+
+if (dryingButton) {
+  dryingButton.addEventListener("click", async () => {
+    try {
+      if (!dryingStarted) {
+        dryingFinished = false;
+
+        dryingStopTime = 0;
+
+        /*
+             ESP32 akan membuat
+             startTime resmi.
+          */
+
+        await set(ref(db, "control/startDrying"), true);
+
+        console.log("Perintah START dikirim");
+      } else {
+        /*
+             STOP MANUAL
+          */
+
+        dryingStopTime = Date.now();
+
+        dryingFinished = true;
+
+        await set(ref(db, "control/startDrying"), false);
+
+        console.log("Perintah STOP dikirim");
+      }
+    } catch (error) {
+      console.error("Gagal mengubah kontrol:", error);
+
+      alert("Gagal mengirim perintah ke ESP32");
+    }
+  });
+}
+
+/* ==========================================================
+   UPDATE TOMBOL
+========================================================== */
+
+function updateDryingButton() {
+  if (!dryingButton) {
+    return;
+  }
+
+  if (dryingStarted) {
+    dryingButton.innerHTML = '<i class="fas fa-stop"></i> Hentikan Pengeringan';
+
+    dryingButton.className = "drying-button stop";
+  } else {
+    dryingButton.innerHTML = '<i class="fas fa-play"></i> Mulai Pengeringan';
+
+    dryingButton.className = "drying-button start";
+  }
+}
+
+/* ==========================================================
+   UPDATE STATUS
 ========================================================== */
 
 function updateStatus(kondisi) {
-  if (!status) return;
+  if (!status) {
+    return;
+  }
 
-  // reset class
+  status.className = "status-text";
 
-  status.className = "";
+  if (alarmStatus) {
+    alarmStatus.textContent = "Normal";
+  }
 
   switch (kondisi) {
     case "STANDBY":
+      status.textContent = "⏸ STANDBY";
 
-    status.innerHTML = "⏸ STANDBY";
+      status.classList.add("status-standby");
 
-    status.classList.add("status-standby");
-
-    if (notif) {
-
-        notif.innerHTML = "Menunggu suhu oven mencapai 30°C";
+      if (notif) {
+        notif.textContent = "Menunggu proses pengeringan dimulai";
 
         notif.className = "notif aman";
+      }
 
-    }
-    break;
+      break;
+
     case "HEATING":
-      status.innerHTML = "🔥 HEATING";
+      status.textContent = "🔥 HEATING";
 
       status.classList.add("status-heating");
 
       if (notif) {
-        notif.innerHTML = "Oven sedang melakukan pemanasan";
+        notif.textContent = "Oven sedang melakukan pemanasan";
 
         notif.className = "notif aman";
       }
@@ -266,12 +525,12 @@ function updateStatus(kondisi) {
       break;
 
     case "OPTIMAL":
-      status.innerHTML = "✅ OPTIMAL";
+      status.textContent = "✅ OPTIMAL";
 
       status.classList.add("status-optimal");
 
       if (notif) {
-        notif.innerHTML = "Kondisi pengeringan optimal";
+        notif.textContent = "Kondisi pengeringan optimal";
 
         notif.className = "notif aman";
       }
@@ -279,12 +538,12 @@ function updateStatus(kondisi) {
       break;
 
     case "READY":
-      status.innerHTML = "✔ READY";
+      status.textContent = "✔ READY";
 
       status.classList.add("status-ready");
 
       if (notif) {
-        notif.innerHTML = "Bahan siap diperiksa";
+        notif.textContent = "Bahan siap diperiksa";
 
         notif.className = "notif aman";
       }
@@ -292,56 +551,127 @@ function updateStatus(kondisi) {
       break;
 
     case "WARNING":
-      status.innerHTML = "⚠ WARNING";
+      status.textContent = "⚠ WARNING";
 
       status.classList.add("status-warning");
 
       if (notif) {
-        notif.innerHTML = "Suhu atau kelembapan tidak aman";
+        notif.textContent =
+          "Suhu atau kelembapan berada pada kondisi peringatan";
 
         notif.className = "notif warning";
+      }
+
+      if (alarmStatus) {
+        alarmStatus.textContent = "Warning";
+      }
+
+      break;
+
+    case "DANGER":
+      status.textContent = "🚨 DANGER";
+
+      status.classList.add("status-danger");
+
+      if (notif) {
+        notif.textContent = "Kondisi berbahaya! Gas dimatikan secara otomatis.";
+
+        notif.className = "notif danger";
+      }
+
+      if (alarmStatus) {
+        alarmStatus.textContent = "Danger";
+      }
+
+      break;
+
+    case "DONE":
+      status.textContent = "✔ DONE";
+
+      status.classList.add("status-ready");
+
+      dryingFinished = true;
+
+      dryingStarted = false;
+
+      stopDurationTimer();
+
+      if (notif) {
+        notif.textContent = "Proses pengeringan selesai";
+
+        notif.className = "notif aman";
+      }
+
+      if (dryingControlStatus) {
+        dryingControlStatus.textContent = "Proses pengeringan selesai";
       }
 
       break;
 
     case "SENSOR ERROR":
-      status.innerHTML = "❌ SENSOR ERROR";
+      status.textContent = "❌ SENSOR ERROR";
 
       status.classList.add("status-warning");
 
       if (notif) {
-        notif.innerHTML = "Sensor mengalami masalah";
+        notif.textContent = "Sensor mengalami masalah";
 
         notif.className = "notif warning";
+      }
+
+      if (alarmStatus) {
+        alarmStatus.textContent = "Sensor Error";
       }
 
       break;
 
     default:
-      status.innerHTML = kondisi;
+      status.textContent = kondisi;
+
+      if (notif) {
+        notif.textContent = "Sistem sedang mengirimkan data";
+
+        notif.className = "notif";
+      }
   }
 }
 
 /* ==========================================================
-   GAS STATUS
+   GAS AND VALVE
 ========================================================== */
 
 function updateGas(gas) {
-  if (!gasStatus) return;
+  if (!gasStatus) {
+    return;
+  }
 
   if (gas === "ON") {
-    gasStatus.innerHTML = "🟢 GAS ON";
+    gasStatus.textContent = "🟢 GAS ON";
 
     gasStatus.className = "gas-on";
-  } else {
-    gasStatus.innerHTML = "🔴 GAS OFF";
 
-    gasStatus.className = "gas-off";
+    if (valveStatus) {
+      valveStatus.textContent = "Katup Terbuka";
+
+      valveStatus.className = "valve-status valve-open";
+    }
+
+    return;
+  }
+
+  gasStatus.textContent = "🔴 GAS OFF";
+
+  gasStatus.className = "gas-off";
+
+  if (valveStatus) {
+    valveStatus.textContent = "Katup Tertutup";
+
+    valveStatus.className = "valve-status valve-closed";
   }
 }
 
 /* ==========================================================
-   CHART.JS REALTIME SENSOR
+   CHART
 ========================================================== */
 
 const chartCanvas = document.getElementById("sensorChart");
@@ -377,7 +707,7 @@ if (chartCanvas) {
         },
 
         {
-          label: "Moisture %",
+          label: "Kadar Air %",
 
           data: [],
 
@@ -417,6 +747,8 @@ if (chartCanvas) {
         y: {
           beginAtZero: true,
 
+          suggestedMax: 100,
+
           title: {
             display: true,
 
@@ -429,20 +761,23 @@ if (chartCanvas) {
 }
 
 /* ==========================================================
-   UPDATE CHART FUNCTION
+   UPDATE CHART
 ========================================================== */
 
 function updateChart(temp, hum, moist) {
-  if (!sensorChart) return;
+  if (!sensorChart) {
+    return;
+  }
 
-  let now = new Date();
+  const now = new Date();
 
-  let label =
-    now.getHours().toString().padStart(2, "0") +
-    ":" +
-    now.getMinutes().toString().padStart(2, "0") +
-    ":" +
-    now.getSeconds().toString().padStart(2, "0");
+  const label = now.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+
+    minute: "2-digit",
+
+    second: "2-digit",
+  });
 
   sensorChart.data.labels.push(label);
 
@@ -451,8 +786,6 @@ function updateChart(temp, hum, moist) {
   sensorChart.data.datasets[1].data.push(hum);
 
   sensorChart.data.datasets[2].data.push(moist);
-
-  // simpan maksimal 30 data
 
   const maxData = 30;
 
@@ -464,15 +797,17 @@ function updateChart(temp, hum, moist) {
     });
   }
 
-  sensorChart.update();
+  sensorChart.update("none");
 }
 
 /* ==========================================================
-   INTERNET CONNECTION CHECK
+   INTERNET CHECK
 ========================================================== */
 
 function checkInternet() {
-  if (!wifiIcon) return;
+  if (!wifiIcon) {
+    return;
+  }
 
   if (navigator.onLine) {
     wifiIcon.classList.remove("wifi-offline");
@@ -494,16 +829,17 @@ setInterval(checkInternet, 5000);
 ========================================================== */
 
 setInterval(() => {
-  let selisih = Date.now() - lastFirebaseUpdate;
+  if (lastFirebaseUpdate === 0) {
+    return;
+  }
 
-  // jika tidak menerima data
-  // lebih dari 15 detik
+  const selisih = Date.now() - lastFirebaseUpdate;
 
   if (selisih > 30000) {
-    if (espStatus) {
-      espStatus.innerHTML = "ESP32 Offline";
+    setEspStatus(false);
 
-      espStatus.className = "esp-status offline";
+    if (firebaseStatus) {
+      firebaseStatus.textContent = "Disconnected";
     }
   }
 }, 5000);
@@ -519,43 +855,27 @@ cards.forEach((card, index) => {
 
   card.style.transform = "translateY(20px)";
 
-  setTimeout(
-    () => {
-      card.style.transition = "0.5s";
+  setTimeout(() => {
+    card.style.transition = "0.5s";
 
-      card.style.opacity = "1";
+    card.style.opacity = "1";
 
-      card.style.transform = "translateY(0)";
-    },
-
-    index * 150,
-  );
+    card.style.transform = "translateY(0)";
+  }, index * 150);
 });
 
 /* ==========================================================
    DASHBOARD READY
 ========================================================== */
 
-window.addEventListener(
-  "load",
+window.addEventListener("load", () => {
+  console.log("=================================");
 
-  () => {
-    console.log("=================================");
+  console.log(" HerbaDry Monitoring Dashboard ");
 
-    console.log(" HerbaDry Monitoring Dashboard ");
+  console.log(" Firebase Connected ");
 
-    console.log(" Firebase Connected ");
+  console.log(" Waiting ESP32 Data... ");
 
-    console.log(" Waiting ESP32 Data...");
-
-    console.log("=================================");
-  },
-);
-
-/* ==========================================================
-   KEEP ALIVE
-========================================================== */
-
-setInterval(() => {
-  console.log("Dashboard Active");
-}, 60000);
+  console.log("=================================");
+});
