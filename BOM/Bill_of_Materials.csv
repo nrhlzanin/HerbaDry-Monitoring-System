@@ -1,0 +1,24 @@
+Designator,Component,Number,Cost per unit (IDR),Total cost (IDR),Source of materials,Material type
+U1,ESP32 DevKit V1,1,69500,69500,,Semiconductor
+S1,DHT22,1,30000,30000,,Semiconductor
+S2,Capacitive Soil Moisture Sensor V1.2,1,13100,13100,,Semiconductor
+U2,ESP32 Expansion Board,1,25000,25000,,Semiconductor
+DS1,LCD 20x4 + I2C Module,1,35000,35000,,Semiconductor
+PS1,12 V 1 A Adapter,1,30000,30000,,Other
+PS2,LM2596 Step Down Converter,1,15000,15000,,Semiconductor
+J1,Jumper Cable Male to Female,2 packs,9900,9900,,Other
+J2,Jumper Cable Female to Female,1 pack,9900,9900,,Other
+J3,Jumper Cable Female to Female,3 packs,22500,22500,,Other
+J4,DC Female Power Connector,1,3000,3000,,Other
+A1,Smart Valve,1,342752,342752,,Other
+G1,Gas Regulator,1,132180,132180,,Metal
+SD1,MicroSD Card Module,1,10000,10000,,Semiconductor
+W1,Black Cable,1,5000,5000,,Other
+W2,Red Cable,1,5000,5000,,Other
+W3,Heat Shrink Ø4 mm,1,10000,10000,,Polymer
+M1,Stainless Steel Knee 1/2 inch,1,12750,12750,,Metal
+M2,Socket Draft Plug Nipple 1/2 × 3/4 inch,1,11500,11500,,Metal
+M3,Double Drat 1/2 inch,1,6000,6000,,Metal
+M4,Stainless Steel Flexible Hose 30 cm,1,18000,18000,,Metal
+E1,PVC Project Box KX6,1,9500,9500,,Polymer
+C1,Solder,1,2500,2500,,Metal
