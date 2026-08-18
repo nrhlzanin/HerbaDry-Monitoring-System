@@ -924,9 +924,8 @@ https://github.com/nrhlzanin/HerbaDry-Monitoring-System
 Zenodo:
 
 ```text
-[ZENODO DOI TO BE ADDED]
+https://doi.org/10.5281/zenodo.21993788
 ```
-
 ---
 
 # Related Publication
@@ -999,3 +998,79 @@ The system can be further developed through:
 * Notification system integration.
 * Machine-learning-based drying analysis.
 * Improved gas control and safety mechanisms.
+
+  ## Documentation and Reproducibility
+
+The following documentation is provided to support reproduction, assembly, operation, calibration, and evaluation of the HerbaDry Monitoring System.
+
+### Bill of Materials
+
+The complete Bill of Materials is available at:
+
+`BOM/Bill_of_Materials.csv`
+
+The file contains the component designators, quantities, costs, material types, and source information.
+
+### Wiring Diagram
+
+The hardware wiring diagram is available at:
+
+`hardware/wiring_diagram/HerbaDry_Wiring_Diagram.png`
+
+The wiring diagram describes the electrical connections between the ESP32, sensors, display, communication modules, and other electronic components.
+
+### Assembly Instructions
+
+Detailed hardware assembly instructions are available at:
+
+`documentation/assembly/Assembly_Instructions.md`
+
+### Operation Instructions
+
+Instructions for operating the completed system are available at:
+
+`documentation/operation/Operation_Instructions.md`
+
+### Moisture Sensor Calibration
+
+The calibration procedure for the moisture sensor is available at:
+
+`documentation/calibration/Moisture_Sensor_Calibration.md`
+
+The calibration procedure describes the comparison between sensor readings and reference moisture content determined using the gravimetric method.
+
+### Validation and Characterization
+
+The validation and characterization procedure is available at:
+
+`documentation/testing/Validation_and_Characterization.md`
+
+This document describes the evaluation of sensor performance, data communication, dashboard operation, and overall system functionality.
+
+## Source Code
+
+The ESP32 firmware is available in:
+
+`ESP32/`
+
+The web-based monitoring dashboard consists of:
+
+- `index.html`
+- `app.js`
+- `style.css`
+
+## Open Source Repository
+
+The source files for the HerbaDry Monitoring System are publicly available through the project's GitHub repository.
+
+GitHub Repository:
+
+https://github.com/nrhlzanin/HerbaDry-Monitoring-System
+
+The archived version of the source files is available through Zenodo:
+
+https://doi.org/10.5281/zenodo.21993788
+
+## License
+
+This project is distributed under an open-source license. See the `LICENSE` file for details.
